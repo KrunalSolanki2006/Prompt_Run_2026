@@ -1,32 +1,48 @@
-# React + TypeScript + Vite
+# RUNWAY — 30-Day Financial Cockpit for Gen Z
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> "Try the decision before it costs you."
 
-Currently, two official plugins are available:
+RUNWAY is an interactive personal finance decision simulator designed for Gen Z to manage a limited ₹10,000 budget over a 30-day cycle. Built with React, TypeScript, Tailwind CSS v4, Motion, and an explainable, pure financial engine.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
+- Node.js >= 20
+- npm >= 10
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### Installation
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### Development Server
+```bash
+npm run dev
+```
+
+### Verification & Testing
+```bash
+# Type check and build
+npm run build
+
+# Run unit tests
+npm run test
+
+# Lint with zero warnings
+npm run lint
+
+# TypeScript verification only
+npm run typecheck
+```
+
+---
+
+## Architecture Overview
+- **Pure Financial Engine**: Driven by `computeSnapshot(state, asOf)` producing an immutable financial health and runway snapshot.
+- **Design System ("Paper & Volt")**: Warm receipt paper `#FBF8F3` with electric volt `#D4F23A` highlights, high-contrast typography, and accessible indicators.
+- **Zero Fabricated Data**: Authentic empty states, user-created records, and local-first browser persistence.
+- **Decision Lab**: Simulates purchases, subscriptions, and stress tests (surprise expenses, delayed income) with before/after ripples.
+
+For comprehensive architectural design and domain modeling, review [`docs/PRODUCT_SPEC.md`](./docs/PRODUCT_SPEC.md).
