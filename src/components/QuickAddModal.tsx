@@ -107,6 +107,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
         <div className="grid grid-cols-3 gap-1 bg-[#FBF8F3] border border-[#E6DFD2] p-1 rounded-xl mb-4 text-xs font-semibold">
           <button
             type="button"
+            data-testid="quick-add-tab-expense"
             onClick={() => {
               setActiveTab('expense')
               setFormError(null)
@@ -122,6 +123,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
           </button>
           <button
             type="button"
+            data-testid="quick-add-tab-income"
             onClick={() => {
               setActiveTab('income')
               setFormError(null)
@@ -137,6 +139,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
           </button>
           <button
             type="button"
+            data-testid="quick-add-tab-goal"
             onClick={() => {
               setActiveTab('goal_deposit')
               setFormError(null)
@@ -165,15 +168,30 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Amount */}
           <div className="space-y-1">
-            <Label htmlFor="qa-amount" className="text-xs font-semibold">
-              Amount (₹)
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="qa-amount" className="text-xs font-semibold">
+                Amount (₹)
+              </Label>
+              <div className="flex items-center gap-1">
+                {[100, 250, 500, 1000].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setAmountStr(String(preset))}
+                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#FBF8F3] border border-[#E6DFD2] text-[#5E5A52] hover:text-[#16140F]"
+                  >
+                    ₹{preset}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="relative">
               <span className="absolute left-3 top-2.5 text-base font-bold text-[#5E5A52]">
                 ₹
               </span>
               <Input
                 id="qa-amount"
+                data-testid="form-amount"
                 type="number"
                 inputMode="numeric"
                 min="1"
@@ -223,6 +241,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               </Label>
               <select
                 id="qa-category"
+                data-testid="form-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as CategoryId)}
                 className="w-full h-10 px-3 text-xs bg-[#FBF8F3] border border-[#E6DFD2] rounded-xl text-[#16140F] focus:outline-none"
@@ -239,10 +258,11 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
           {/* Description / Note */}
           <div className="space-y-1">
             <Label htmlFor="qa-note" className="text-xs font-semibold">
-              Note
+              Note / Description
             </Label>
             <Input
               id="qa-note"
+              data-testid="form-description"
               type="text"
               placeholder={
                 activeTab === 'expense'
@@ -298,6 +318,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               <div className="flex items-start gap-3 p-3 rounded-xl bg-[#FBF8F3] border border-[#E6DFD2]">
                 <input
                   id="qa-unexpected-checkbox"
+                  data-testid="quick-add-unexpected"
                   type="checkbox"
                   checked={unexpected}
                   onChange={(e) => setUnexpected(e.target.checked)}
@@ -326,6 +347,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
             </Button>
             <Button
               type="submit"
+              data-testid="form-submit"
               className="h-10 text-xs font-bold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 rounded-xl px-5"
             >
               Log Transaction

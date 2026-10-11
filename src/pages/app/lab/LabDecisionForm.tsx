@@ -250,12 +250,13 @@ export const LabDecisionForm: React.FC<LabDecisionFormProps> = ({
           1. Choose Decision or Stress Test
         </span>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div data-testid="lab-type-picker" className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {DECISION_TYPES.map((type) => {
             const isSelected = selectedType === type.key
             return (
               <button
                 key={type.key}
+                data-testid={`lab-type-${type.key}`}
                 type="button"
                 onClick={() => setSelectedType(type.key)}
                 className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
@@ -326,11 +327,26 @@ export const LabDecisionForm: React.FC<LabDecisionFormProps> = ({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label htmlFor="dec-purchase-amount" className="text-xs font-semibold text-[#16140F]">
-                    Price (₹)
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="dec-purchase-amount" className="text-xs font-semibold text-[#16140F]">
+                      Price (₹)
+                    </Label>
+                    <div className="flex items-center gap-1">
+                      {[200, 500, 1000].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setPurchaseAmount(String(preset))}
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#FBF8F3] border border-[#E6DFD2] text-[#5E5A52] hover:text-[#16140F]"
+                        >
+                          ₹{preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <Input
                     id="dec-purchase-amount"
+                    data-testid="form-amount"
                     type="number"
                     inputMode="numeric"
                     min="1"
@@ -734,6 +750,7 @@ export const LabDecisionForm: React.FC<LabDecisionFormProps> = ({
               </div>
               <Input
                 id="dec-spend-pace"
+                data-testid="lab-spending-slider"
                 type="range"
                 min="-50"
                 max="50"

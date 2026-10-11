@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useAuth } from '@/features/auth/AuthContext'
 import { Logo } from '@/components/Logo'
 import { ConsequenceChain } from '@/components/ConsequenceChain'
+import { QuickCheckCalculator } from '@/components/QuickCheckCalculator'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import {
   Calendar,
@@ -131,6 +132,11 @@ export const Landing: React.FC = () => {
             <div className="lg:col-span-5 animate-slide-in-right">
               <ConsequenceChain />
             </div>
+          </div>
+
+          {/* INTERACTIVE INSTANT ESTIMATE CALCULATOR (REAL ENGINE) */}
+          <div className="mt-12 sm:mt-16">
+            <QuickCheckCalculator />
           </div>
         </section>
 

@@ -33,11 +33,28 @@ import { FinanceStateSchema } from './schemas'
 import { Occurrence } from '@/engine/occurrences'
 import { formatRupees } from '@/lib/format'
 
+export interface RippleLogEntry {
+  id: string
+  timestamp: string
+  actionLabel: string
+  allowanceBefore: number
+  allowanceAfter: number
+  forecastBefore: number
+  forecastAfter: number
+  riskLevelBefore: string
+  riskLevelAfter: string
+  riskScoreBefore: number
+  riskScoreAfter: number
+  healthBefore: number | null
+  healthAfter: number | null
+}
+
 interface FinanceContextValue {
   state: FinanceState
   snapshot: Snapshot
   dispatch: React.Dispatch<FinanceAction>
   corruptBackupKey: string | null
+  recentRipples: RippleLogEntry[]
   initCycle: (cycle: Cycle) => void
   updateCycle: (updates: Partial<Cycle>) => void
   completeCycle: (summary: CycleSummary, newStartDate: string) => void
@@ -85,6 +102,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [state, dispatchRaw] = useReducer(financeReducer, initialFinanceState)
   const [corruptBackupKey, setCorruptBackupKey] = useState<string | null>(null)
+  const [recentRipples, setRecentRipples] = useState<RippleLogEntry[]>([])
   const previousStateRef = useRef<FinanceState>(state)
   const isLoadedRef = useRef(false)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -213,6 +231,24 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({
         const sign = hDiff > 0 ? '+' : ''
         changes.push(`Health score: ${sign}${hDiff} pts`)
       }
+
+      // Record persistent ripple entry
+      const newRipple: RippleLogEntry = {
+        id: `rip_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        actionLabel: actionLabel ?? 'Updated finances',
+        allowanceBefore: preSnapshot.allowance.daily,
+        allowanceAfter: postSnapshot.allowance.daily,
+        forecastBefore: preSnapshot.forecast.endExpected,
+        forecastAfter: postSnapshot.forecast.endExpected,
+        riskLevelBefore: preSnapshot.risk.level,
+        riskLevelAfter: postSnapshot.risk.level,
+        riskScoreBefore: preSnapshot.risk.score,
+        riskScoreAfter: postSnapshot.risk.score,
+        healthBefore: preSnapshot.health.score,
+        healthAfter: postSnapshot.health.score,
+      }
+      setRecentRipples((prev) => [newRipple, ...prev].slice(0, 5))
 
       // Show consequence toast with deltas and undo
       const title = actionLabel ?? 'Updated finances'
@@ -523,6 +559,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({
         snapshot,
         dispatch: dispatchWithConsequence,
         corruptBackupKey,
+        recentRipples,
         initCycle,
         updateCycle,
         completeCycle,

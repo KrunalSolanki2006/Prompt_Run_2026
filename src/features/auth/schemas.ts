@@ -6,7 +6,7 @@ export const signUpSchema = z
     name: z
       .string()
       .transform(cleanText(60))
-      .refine((v) => v.length >= 2, 'Name must be at least 2 characters')
+      .refine((v) => v.length >= 1, 'Name must be at least 1 character')
       .refine((v) => v.length <= 60, 'Name must be at most 60 characters'),
     email: z
       .string()
@@ -16,7 +16,7 @@ export const signUpSchema = z
       .email('Please enter a valid email address'),
     password: z
       .string()
-      .min(10, 'Password must be at least 10 characters')
+      .min(8, 'Password must be at least 8 characters')
       .regex(/[A-Za-z]/, 'Password must include at least one letter')
       .regex(/[0-9]/, 'Password must include at least one number'),
     confirmPassword: z.string().min(1, 'Please confirm your password'),

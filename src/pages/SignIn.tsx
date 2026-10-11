@@ -127,6 +127,7 @@ export const SignIn: React.FC = () => {
                     <Mail className="w-4 h-4 text-[#5E5A52] absolute left-3 top-3 pointer-events-none" />
                     <Input
                       id="signin-email"
+                      data-testid="signin-email"
                       type="email"
                       autoComplete="email"
                       placeholder="alex@example.com"
@@ -152,6 +153,7 @@ export const SignIn: React.FC = () => {
                     <Lock className="w-4 h-4 text-[#5E5A52] absolute left-3 top-3 pointer-events-none" />
                     <Input
                       id="signin-password"
+                      data-testid="signin-password"
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
                       placeholder="Your password"
@@ -179,6 +181,7 @@ export const SignIn: React.FC = () => {
                 <div className="pt-2">
                   <Button
                     type="submit"
+                    data-testid="signin-submit"
                     disabled={isSubmitting || isLocked}
                     className="w-full h-11 text-base font-bold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 rounded-[10px]"
                   >

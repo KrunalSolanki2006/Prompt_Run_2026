@@ -15,6 +15,7 @@ import { SavingsGoalsMiniCard } from './today/SavingsGoalsMiniCard'
 import { RecentActivityCard } from './today/RecentActivityCard'
 import { CycleChecklistCard } from './today/CycleChecklistCard'
 import { CycleCompletionModal } from './today/CycleCompletionModal'
+import { WhatChangedCard } from './today/WhatChangedCard'
 import {
   ArrowRight,
   PiggyBank,
@@ -24,6 +25,7 @@ import {
   AlertOctagon,
   Trophy,
   RotateCcw,
+  FlaskConical,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { CycleSummary } from '@/engine/types'
@@ -31,7 +33,7 @@ import type { CycleSummary } from '@/engine/types'
 export const Today: React.FC = () => {
   useDocumentTitle('Today Cockpit')
   const navigate = useNavigate()
-  const { state, snapshot, settleOccurrence, completeCycle } = useFinance()
+  const { state, snapshot, settleOccurrence, completeCycle, recentRipples } = useFinance()
   const today = useToday()
   const [completionModalOpen, setCompletionModalOpen] = useState(false)
 
@@ -383,6 +385,41 @@ export const Today: React.FC = () => {
       {/* RECENT ACTIVITY (LAST 5 TRANSACTIONS) */}
       <div className="animate-pop-up">
         <RecentActivityCard transactions={recentTransactions} />
+      </div>
+
+      {/* TRY A DECISION CARD LINKING TO LAB */}
+      <div
+        data-testid="try-decision-card"
+        className="bg-[#16140F] text-[#FBF8F3] border border-[#16140F] rounded-[18px] p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-pop-up"
+      >
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#D4F23A]">
+              Simulation Sandbox
+            </span>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-[#FBF8F3]">
+              Decision Lab
+            </span>
+          </div>
+          <h3 className="font-['Bricolage_Grotesque_Variable'] font-extrabold text-xl text-[#FBF8F3]">
+            Try a decision before spending ₹1
+          </h3>
+          <p className="text-xs text-[#FBF8F3]/80 max-w-xl leading-relaxed">
+            Test discretionary expenses, new subscriptions, fixed commitments, or surprise emergencies. Check the 6 live ripple outputs before making the move.
+          </p>
+        </div>
+        <Button asChild className="h-11 bg-[#D4F23A] text-[#16140F] hover:bg-[#D4F23A]/90 font-bold text-xs rounded-xl px-5 shrink-0 shadow-xs">
+          <Link to="/app/lab">
+            <FlaskConical className="w-4 h-4 mr-2" />
+            <span>Try a Decision</span>
+            <ArrowRight className="w-4 h-4 ml-1" />
+          </Link>
+        </Button>
+      </div>
+
+      {/* PERSISTENT WHAT CHANGED RIPPLE PANEL */}
+      <div className="animate-pop-up">
+        <WhatChangedCard ripples={recentRipples} />
       </div>
 
       {/* ONBOARDING CHECKLIST */}

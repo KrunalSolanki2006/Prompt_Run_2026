@@ -11,7 +11,7 @@
 
 *Built for PROMPT RUN 2026 (Prompt. Build. Run.)*
 
-[Live app → {{LIVE_URL}}]({{LIVE_URL}}) · [Repo → {{REPO_URL}}]({{REPO_URL}})
+[GitHub Repository](https://github.com/KrunalSolanki2006/Prompt_Run_2026) · [Prompt Run 2026 Hackathon](https://github.com/KrunalSolanki2006/Prompt_Run_2026)
 
 </div>
 

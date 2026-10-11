@@ -18,7 +18,7 @@ export const CockpitStats: React.FC<CockpitStatsProps> = ({
   return (
     <div className="space-y-6">
       {/* ALLOWANCE HERO WITH ANIMATED NUMBER */}
-      <div className="bg-white border border-[#E6DFD2] rounded-[18px] p-5 sm:p-8 shadow-xs relative overflow-hidden animate-pop-up">
+      <div data-testid="metric-allowance" className="bg-white border border-[#E6DFD2] rounded-[18px] p-5 sm:p-8 shadow-xs relative overflow-hidden animate-pop-up">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 mb-4">
           <div>
             <span className="text-xs font-bold text-[#5E5A52] uppercase tracking-wider block mb-1">
@@ -83,6 +83,7 @@ export const CockpitStats: React.FC<CockpitStatsProps> = ({
         {/* Wallet */}
         <div className="animate-pop-up" style={{ animationDelay: '0.04s' }}>
           <StatTile
+            dataTestId="metric-wallet"
             label="Liquid Wallet"
             value={hasCycle ? <Money amount={snapshot.wallet} size="2xl" /> : '₹10,000'}
             subtitle={
@@ -97,6 +98,7 @@ export const CockpitStats: React.FC<CockpitStatsProps> = ({
         {/* Forecast End */}
         <div className="animate-pop-up" style={{ animationDelay: '0.08s' }}>
           <StatTile
+            dataTestId="metric-forecast"
             label="Cycle End Forecast"
             value={hasCycle ? <Money amount={snapshot.forecast.endExpected} size="2xl" /> : '₹—'}
             subtitle={
@@ -110,7 +112,7 @@ export const CockpitStats: React.FC<CockpitStatsProps> = ({
 
         {/* Risk Gauge */}
         <div className="animate-pop-up" style={{ animationDelay: '0.12s' }}>
-          <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between h-full">
+          <div data-testid="metric-risk" className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between h-full">
             <Gauge
               value={hasCycle ? snapshot.risk.score : null}
               label="Risk Score"
@@ -137,7 +139,7 @@ export const CockpitStats: React.FC<CockpitStatsProps> = ({
 
         {/* Health Gauge */}
         <div className="animate-pop-up" style={{ animationDelay: '0.16s' }}>
-          <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between h-full">
+          <div data-testid="metric-health" className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between h-full">
             <Gauge
               value={hasCycle && snapshot.health.score !== null ? snapshot.health.score : null}
               label="Health Grade"

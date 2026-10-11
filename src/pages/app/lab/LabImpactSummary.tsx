@@ -63,7 +63,7 @@ export const LabImpactSummary: React.FC<LabImpactSummaryProps> = ({
 
       {/* Basket Items List */}
       {hasDecisions ? (
-        <div className="space-y-2 mb-6">
+        <div data-testid="lab-basket-items" className="space-y-2 mb-6">
           {basket.map((item) => (
             <div
               key={item.id}
@@ -286,6 +286,7 @@ export const LabImpactSummary: React.FC<LabImpactSummaryProps> = ({
             <div className="pt-2 flex gap-2">
               <Button
                 type="button"
+                data-testid="lab-commit-button"
                 disabled={committableDecisions.length === 0}
                 onClick={onOpenCommitDialog}
                 className="flex-1 h-10 bg-[#16140F] text-[#FBF8F3] font-bold text-xs rounded-lg"

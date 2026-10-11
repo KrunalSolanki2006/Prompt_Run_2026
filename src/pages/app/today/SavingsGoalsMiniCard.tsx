@@ -52,6 +52,7 @@ export const SavingsGoalsMiniCard: React.FC<SavingsGoalsMiniCardProps> = ({
             return (
               <div
                 key={gProj.goalId}
+                data-testid="metric-goal"
                 className="p-3.5 rounded-xl bg-[#FBF8F3] border border-[#E6DFD2] space-y-2"
               >
                 <div className="flex justify-between items-baseline">

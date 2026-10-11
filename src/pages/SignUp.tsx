@@ -39,7 +39,7 @@ export const SignUp: React.FC = () => {
   const passwordVal = watch('password') || ''
 
   // Live password strength calculation
-  const hasMinLength = passwordVal.length >= 10
+  const hasMinLength = passwordVal.length >= 8
   const hasLetter = /[A-Za-z]/.test(passwordVal)
   const hasNumber = /[0-9]/.test(passwordVal)
   const strengthScore = [hasMinLength, hasLetter, hasNumber].filter(Boolean).length
@@ -119,6 +119,7 @@ export const SignUp: React.FC = () => {
                     <User className="w-4 h-4 text-[#5E5A52] absolute left-3 top-3 pointer-events-none" />
                     <Input
                       id="signup-name"
+                      data-testid="signup-name"
                       type="text"
                       autoComplete="name"
                       placeholder="e.g. Alex Sharma"
@@ -144,6 +145,7 @@ export const SignUp: React.FC = () => {
                     <Mail className="w-4 h-4 text-[#5E5A52] absolute left-3 top-3 pointer-events-none" />
                     <Input
                       id="signup-email"
+                      data-testid="signup-email"
                       type="email"
                       autoComplete="email"
                       placeholder="alex@example.com"
@@ -169,9 +171,10 @@ export const SignUp: React.FC = () => {
                     <Lock className="w-4 h-4 text-[#5E5A52] absolute left-3 top-3 pointer-events-none" />
                     <Input
                       id="signup-pass"
+                      data-testid="signup-password"
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
-                      placeholder="At least 10 characters with letter and number"
+                      placeholder="At least 8 characters with letter and number"
                       className="pl-9 pr-10 h-11 text-base bg-[#FBF8F3] border-[#E6DFD2] rounded-[10px]"
                       aria-invalid={!!errors.password}
                       aria-describedby="signup-pass-strength"
@@ -208,7 +211,7 @@ export const SignUp: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between text-[10px] text-[#5E5A52] pt-0.5">
                       <span className={hasMinLength ? 'text-[#1D7A53] font-semibold flex items-center gap-0.5' : ''}>
-                        {hasMinLength && <Check className="w-3 h-3" />} 10+ chars
+                        {hasMinLength && <Check className="w-3 h-3" />} 8+ chars
                       </span>
                       <span className={hasLetter ? 'text-[#1D7A53] font-semibold flex items-center gap-0.5' : ''}>
                         {hasLetter && <Check className="w-3 h-3" />} Letter
@@ -235,6 +238,7 @@ export const SignUp: React.FC = () => {
                     <Lock className="w-4 h-4 text-[#5E5A52] absolute left-3 top-3 pointer-events-none" />
                     <Input
                       id="signup-confirm"
+                      data-testid="signup-confirm-password"
                       type={showConfirm ? 'text' : 'password'}
                       autoComplete="new-password"
                       placeholder="Repeat password"
@@ -262,6 +266,7 @@ export const SignUp: React.FC = () => {
                 <div className="pt-2">
                   <Button
                     type="submit"
+                    data-testid="signup-submit"
                     disabled={isSubmitting}
                     className="w-full h-11 text-base font-bold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 rounded-[10px]"
                   >

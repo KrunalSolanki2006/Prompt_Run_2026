@@ -108,8 +108,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const cleanName = cleanText(name)
       const cleanEmail = cleanText(email).toLowerCase()
 
-      if (cleanName.length < 2 || cleanName.length > 60) {
-        return { success: false, error: 'Full name must be between 2 and 60 characters.' }
+      if (cleanName.length < 1 || cleanName.length > 60) {
+        return { success: false, error: 'Full name must be between 1 and 60 characters.' }
       }
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -118,14 +118,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (
-        password.length < 10 ||
+        password.length < 8 ||
         !/[A-Za-z]/.test(password) ||
         !/\d/.test(password)
       ) {
         return {
           success: false,
           error:
-            'Password must be at least 10 characters and contain both a letter and a number.',
+            'Password must be at least 8 characters and contain both a letter and a number.',
         }
       }
 

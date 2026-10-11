@@ -9,6 +9,7 @@ interface StatTileProps {
   badge?: React.ReactNode
   className?: string
   footer?: React.ReactNode
+  dataTestId?: string
 }
 
 export const StatTile: React.FC<StatTileProps> = ({
@@ -20,9 +21,11 @@ export const StatTile: React.FC<StatTileProps> = ({
   badge,
   className = '',
   footer,
+  dataTestId,
 }) => {
   return (
     <div
+      data-testid={dataTestId}
       className={`bg-white border border-[#E6DFD2] rounded-[14px] p-4.5 flex flex-col justify-between transition-colors hover:border-[#16140F]/30 ${className}`}
     >
       <div>

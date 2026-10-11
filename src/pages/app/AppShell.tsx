@@ -34,14 +34,15 @@ interface NavItem {
   shortLabel: string
   to: string
   icon: React.ReactNode
+  testId: string
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Today', shortLabel: 'Today', to: '/app', icon: <CalendarDays className="w-4 h-4" /> },
-  { label: 'Decision Lab', shortLabel: 'Lab', to: '/app/lab', icon: <FlaskConical className="w-4 h-4" /> },
-  { label: 'Plan', shortLabel: 'Plan', to: '/app/plan', icon: <Layers className="w-4 h-4" /> },
-  { label: 'Activity', shortLabel: 'Activity', to: '/app/activity', icon: <ReceiptText className="w-4 h-4" /> },
-  { label: 'Insights', shortLabel: 'Insights', to: '/app/insights', icon: <LineChart className="w-4 h-4" /> },
+  { label: 'Today', shortLabel: 'Today', to: '/app', icon: <CalendarDays className="w-4 h-4" />, testId: 'nav-today' },
+  { label: 'Decision Lab', shortLabel: 'Lab', to: '/app/lab', icon: <FlaskConical className="w-4 h-4" />, testId: 'nav-lab' },
+  { label: 'Plan', shortLabel: 'Plan', to: '/app/plan', icon: <Layers className="w-4 h-4" />, testId: 'nav-plan' },
+  { label: 'Activity', shortLabel: 'Activity', to: '/app/activity', icon: <ReceiptText className="w-4 h-4" />, testId: 'nav-activity' },
+  { label: 'Insights', shortLabel: 'Insights', to: '/app/insights', icon: <LineChart className="w-4 h-4" />, testId: 'nav-insights' },
 ]
 
 export const AppShell: React.FC = () => {
@@ -132,6 +133,7 @@ export const AppShell: React.FC = () => {
               <NavLink
                 key={item.to}
                 to={item.to}
+                data-testid={item.testId}
                 end={item.to === '/app'}
                 className={({ isActive }) =>
                   `flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-3 px-2 lg:px-3.5 py-2.5 rounded-[10px] font-semibold transition-colors ${
@@ -176,7 +178,7 @@ export const AppShell: React.FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white border-[#E6DFD2]">
               <DropdownMenuLabel className="text-xs text-[#5E5A52]">Session Options</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => navigate('/app/settings')}>
+              <DropdownMenuItem data-testid="nav-settings" onClick={() => navigate('/app/settings')}>
                 <Settings className="w-4 h-4 mr-2" />
                 <span>Settings</span>
               </DropdownMenuItem>
@@ -186,6 +188,7 @@ export const AppShell: React.FC = () => {
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#E6DFD2]" />
               <DropdownMenuItem
+                data-testid="signout-button"
                 className="text-[#B42318] focus:text-[#B42318]"
                 onClick={() => {
                   signOut()
@@ -216,6 +219,7 @@ export const AppShell: React.FC = () => {
             {state.cycle && (
               <Button
                 type="button"
+                data-testid="quick-add-button"
                 onClick={() => setQuickAddOpen(true)}
                 className="h-9 min-h-[44px] px-3 sm:px-3.5 bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs"
               >
@@ -306,6 +310,7 @@ export const AppShell: React.FC = () => {
           <NavLink
             key={item.to}
             to={item.to}
+            data-testid={`${item.testId}-mobile`}
             end={item.to === '/app'}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-2.5 rounded-lg text-[10px] font-semibold transition-colors ${
