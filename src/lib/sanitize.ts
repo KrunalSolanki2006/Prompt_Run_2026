@@ -9,23 +9,34 @@ import type { Rupees } from '@/engine/types'
  * 4. Trims leading and trailing whitespace
  * 5. Truncates length to `max` characters
  */
-export function cleanText(max: number = 200): (input: string) => string {
-  return (input: string): string => {
-    if (typeof input !== 'string') return ''
-    
-    // Convert tabs, newlines, and carriage returns to space first
-    const spaced = input.replace(/[\t\r\n]+/g, ' ')
-    
-    // Remove remaining control characters and bidi overrides
-    const stripped = spaced
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-      .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
-    
-    // Collapse whitespace and trim
-    const normalized = stripped.replace(/\s+/g, ' ').trim()
-    
-    return normalized.slice(0, max)
+function sanitizeString(input: string, max: number = 200): string {
+  if (typeof input !== 'string') return ''
+  
+  // Convert tabs, newlines, and carriage returns to space first
+  const spaced = input.replace(/[\t\r\n]+/g, ' ')
+  
+  // Remove remaining control characters and bidi overrides
+  const stripped = spaced
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+    .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')
+  
+  // Collapse whitespace and trim
+  const normalized = stripped.replace(/\s+/g, ' ').trim()
+  
+  return normalized.slice(0, max)
+}
+
+export function cleanText(input: string, max?: number): string
+export function cleanText(max?: number): (input: string) => string
+export function cleanText(
+  arg?: string | number,
+  max: number = 200
+): string | ((input: string) => string) {
+  if (typeof arg === 'string') {
+    return sanitizeString(arg, max)
   }
+  const maxLimit = typeof arg === 'number' ? arg : 200
+  return (input: string): string => sanitizeString(input, maxLimit)
 }
 
 /**

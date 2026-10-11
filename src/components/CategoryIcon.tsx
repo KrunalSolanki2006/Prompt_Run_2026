@@ -15,23 +15,35 @@ import {
 import type { CategoryId } from '@/engine/types'
 
 interface CategoryIconProps {
-  categoryId: CategoryId
+  categoryId?: CategoryId
+  category?: CategoryId
   className?: string
-  size?: number
+  size?: number | string
 }
 
 export const CategoryIcon: React.FC<CategoryIconProps> = ({
   categoryId,
+  category,
   className = 'w-4 h-4',
   size,
 }) => {
+  const cat = categoryId ?? category ?? 'other'
+  const numericSize =
+    typeof size === 'number'
+      ? size
+      : size === 'sm'
+      ? 14
+      : size === 'lg'
+      ? 20
+      : undefined
+
   const iconProps = {
     className,
-    size,
+    size: numericSize,
     'aria-hidden': true,
   }
 
-  switch (categoryId) {
+  switch (cat) {
     case 'food':
       return <Utensils {...iconProps} />
     case 'transport':

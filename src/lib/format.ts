@@ -16,6 +16,9 @@ export function formatINR(amount: Rupees): string {
   return inrFormatter.format(Math.round(amount))
 }
 
+export const formatRupees = formatINR
+
+
 const MONTH_NAMES = [
   'Jan',
   'Feb',

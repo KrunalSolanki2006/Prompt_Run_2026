@@ -372,3 +372,90 @@ export type Decision =
 - **Modularity**: Files strictly kept under ~300 lines of code. Named exports standard (default exports restricted to lazy page boundaries).
 - **Sanitization**: All user inputs undergo normalization via `cleanText()` (trim, whitespace normalization, bidi control character removal).
 - **Date Handling**: Exclusively local ISO strings (`YYYY-MM-DD`). No unsafe `new Date("YYYY-MM-DD")` parsing.
+
+---
+
+## 11. Engine Rules & Implementation Record (Stage 2 Reference)
+
+### 11.1 Pure Calculation Engine (`src/engine/engine.ts`)
+- **Single Source of Truth**: All cockpit calculations originate from `computeSnapshot(state, asOf)`. The function is pure, deterministic, and executes in < 5ms for 30-day timelines.
+- **Priority Waterfall**:
+  1. Starting budget + confirmed income received to date.
+  2. Fixed commitments & digital subscriptions scheduled in the 30-day window.
+  3. Emergency buffer target allocation (0%–30% of budget).
+  4. Priority savings goals allocation ordered by rank (`1` > `2` > `3`).
+  5. Remainder forms the Discretionary Allowance Pool.
+- **Buffer Absorption**:
+  - Unplanned spending or commitment overruns absorb from liquid wallet first.
+  - If liquid wallet drops below 0, the buffer absorbs the negative variance up to `buffer.target`.
+  - Any remaining negative variance constitutes an active cash deficit.
+- **Daily Allowance Pacing**:
+  - `dailyAllowance = Math.floor(Math.max(0, discretionaryRemaining) / daysLeft)`.
+  - `leftToday = dailyAllowance - actualDiscretionarySpentToday`.
+  - Status is `on_track` (if `leftToday >= 0`) or `overspent` (if `leftToday < 0`).
+  - Rollover: Unspent daily allowance rolls into the pool, automatically raising tomorrow's allowance. Overspending automatically tightens tomorrow's allowance.
+
+### 11.2 Forecast Trajectories
+- **Expected Trajectory**:
+  - Daily step: previous balance + scheduled income occurrences − scheduled commitment/subscription occurrences − daily allowance run rate.
+  - Identifies `cashOutDate`: first calendar day where projected liquid cash drops below 0.
+- **Pessimistic Trajectory (Stress Model)**:
+  - Excludes all unconfirmed income sources (`certainty === 'likely'`).
+  - Scales discretionary spending by 1.25x burn rate.
+  - Applies a 1.10x cost multiplier to variable utilities.
+
+### 11.3 Codified Risk Engine (`src/engine/constants.ts`)
+- **Weights (Total: 100)**:
+  - `runwayDepletion`: 35% (pacing ratio and projected runway length).
+  - `bufferErosion`: 25% (ratio of remaining safety cushion to target).
+  - `commitmentBurden`: 20% (fixed obligations as % of total budget).
+  - `incomeStability`: 20% (unconfirmed vs confirmed income ratio).
+- **Hard Overrides**:
+  - If `forecast.cashOutDate !== null`, risk level automatically overrides to `critical` and score is clamped to `Math.max(75, score)`.
+  - If buffer is completely exhausted (0% remaining), score is clamped >= 60.
+- **Bands**:
+  - `low`: 0–24
+  - `moderate`: 25–49
+  - `high`: 50–74
+  - `critical`: 75–100
+
+### 11.4 Codified Health Score (6 Pillars, Total: 100)
+- Returns `null` if cycle is not active.
+- **Pillar Distribution**:
+  1. `budgetAdherence` (25 pts): `Math.max(0, 25 - (overspend / budget) * 50)`.
+  2. `outlook` (20 pts): Based on projected end balance relative to starting budget.
+  3. `bufferProtection` (15 pts): `(remainingBuffer / targetBuffer) * 15`.
+  4. `goalProgress` (15 pts): Ratio of funded goal contributions.
+  5. `billsOnTime` (15 pts): Deducts 5 pts per overdue commitment.
+  6. `subscriptionLoad` (10 pts): Full 10 pts if subscriptions < 15% of budget; scales to 0 if > 30%.
+
+### 11.5 Decision Lab Simulation (`src/engine/engine.ts`)
+- Evaluates scenarios speculatively by creating an immutable clone of `FinanceState` with decisions applied.
+- Produces 6 core comparative metrics:
+  1. Liquid balance delta (`before.wallet` vs `after.wallet`)
+  2. Daily allowance delta (`before.allowance.daily` vs `after.allowance.daily`)
+  3. Projected end balance delta (`before.forecast.projectedEndBalance` vs `after.forecast.projectedEndBalance`)
+  4. Risk score & level delta (`before.risk` vs `after.risk`)
+  5. Health score delta (`before.health` vs `after.health`)
+  6. Goal feasibility deltas (delayed, unfunded, or completed goals)
+- **Deterministic Verdict**:
+  - `danger`: If scenario causes a cash-out date, depletes the buffer below 25%, or drops risk to `critical`.
+  - `caution`: If scenario decreases daily allowance by > 25% or drops buffer below 50%.
+  - `safe`: All parameters remain within healthy thresholds.
+- **Binary Search Max Safe Purchase**:
+  - Binary searches in ₹1 increments between 0 and `snapshot.wallet` to find the exact maximum single spend today that maintains `risk <= 'moderate'` and `allowance.daily >= 0`.
+- **Better Timing Hint**:
+  - Evaluates future days in the cycle to identify when major incoming cash inflows or bill completions allow a planned purchase to proceed safely.
+
+### 11.6 Browser-Local Cryptography (`src/features/auth/crypto.ts`)
+- **Key Derivation**: Web Crypto API PBKDF2 with SHA-256, 600,000 iterations, 256-bit output.
+- **Salt Generation**: 16 cryptographically random bytes via `crypto.getRandomValues`.
+- **Timing Defense**: Constant-time byte-by-byte comparison preventing timing attacks.
+- **Lockout Mechanism**: Exponential backoff triggered after 5 failed authentication attempts (30s initial lockout, doubling up to 15 minutes).
+
+### 11.7 Local Persistence & Undo Architecture (`src/features/store/`)
+- **State Validation**: Zod runtime schema validation on every write and load.
+- **Disaster Recovery**: Automatic corrupt backup to `runway:v1:corrupt:<timestamp>` if schema fails to parse.
+- **Consequence Toasts**: Every state mutation dispatches a sonner consequence toast with a 6-second undo window that restores previous state snapshot.
+- **CSV Sanitization**: All exported CSV cells starting with `=`, `+`, `-`, `@`, `\t`, or `\r` are sanitized with leading single quotes to neutralize spreadsheet formula injection vulnerabilities.
+

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
+import { useAuth } from '@/features/auth/AuthContext'
 import { Logo } from '@/components/Logo'
 import { ConsequenceChain } from '@/components/ConsequenceChain'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -19,6 +20,7 @@ import {
 
 export const Landing: React.FC = () => {
   useDocumentTitle('Make ₹10,000 Last 30 Days')
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-[#FBF8F3] text-[#16140F] flex flex-col selection:bg-[#D4F23A] selection:text-[#16140F]">
@@ -48,19 +50,31 @@ export const Landing: React.FC = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              to="/sign-in"
-              className="text-sm font-semibold text-[#16140F] hover:text-[#5E5A52] px-3 py-1.5 transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/sign-up"
-              className="text-sm font-bold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/85 px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
-            >
-              <span>Get started</span>
-              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-            </Link>
+            {user ? (
+              <Link
+                to="/app"
+                className="text-sm font-bold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/85 px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+              >
+                <span>Open app</span>
+                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/sign-in"
+                  className="text-sm font-semibold text-[#16140F] hover:text-[#5E5A52] px-3 py-1.5 transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/sign-up"
+                  className="text-sm font-bold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/85 px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+                >
+                  <span>Get started</span>
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>

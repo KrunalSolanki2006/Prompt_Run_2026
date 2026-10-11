@@ -1,19 +1,25 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate, useLocation, Navigate } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signInSchema, type SignInFormData } from '@/features/auth/schemas'
+import { useAuth } from '@/features/auth/AuthContext'
 import { Logo } from '@/components/Logo'
 import { ConsequenceChain } from '@/components/ConsequenceChain'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Eye, EyeOff, Lock, Mail, ShieldAlert } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, ShieldAlert, Clock } from 'lucide-react'
 
 export const SignIn: React.FC = () => {
   useDocumentTitle('Sign In')
   const [showPassword, setShowPassword] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  const { user, signIn, lockoutRemainingSeconds } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const {
     register,
@@ -24,10 +30,24 @@ export const SignIn: React.FC = () => {
     mode: 'onBlur',
   })
 
-  const onSubmit = async (_data: SignInFormData) => {
-    // STAGE-2: Local authentication validation against runway:v1:accounts
-    // Will establish local browser session in runway:v1:session
+  // Redirect if already authenticated
+  if (user) {
+    const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/app'
+    return <Navigate to={from} replace />
   }
+
+  const onSubmit = async (data: SignInFormData) => {
+    setAuthError(null)
+    const result = await signIn(data.email, data.password)
+    if (!result.success) {
+      setAuthError(result.error ?? 'Email or password is incorrect.')
+    } else {
+      const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/app'
+      navigate(from, { replace: true })
+    }
+  }
+
+  const isLocked = lockoutRemainingSeconds > 0
 
   return (
     <div className="min-h-screen bg-[#FBF8F3] text-[#16140F] flex flex-col">
@@ -61,9 +81,32 @@ export const SignIn: React.FC = () => {
                 </p>
               </div>
 
+              {/* Lockout Banner */}
+              {isLocked && (
+                <div
+                  className="mb-4 p-3 rounded-lg bg-[#A15C07]/10 border border-[#A15C07]/30 text-xs text-[#A15C07] flex items-center gap-2"
+                  role="alert"
+                >
+                  <Clock className="w-4 h-4 shrink-0" />
+                  <span>
+                    Too many failed attempts. Temporary lockout active: wait{' '}
+                    <strong>{lockoutRemainingSeconds}s</strong>.
+                  </span>
+                </div>
+              )}
+
               {/* Error summary live region */}
               <div aria-live="polite" aria-atomic="true" className="mb-4">
-                {Object.keys(errors).length > 0 && (
+                {authError && (
+                  <div
+                    className="p-3 rounded-lg bg-[#B42318]/10 border border-[#B42318]/30 text-xs text-[#B42318] flex items-center gap-2"
+                    role="alert"
+                  >
+                    <ShieldAlert className="w-4 h-4 shrink-0" />
+                    <span>{authError}</span>
+                  </div>
+                )}
+                {Object.keys(errors).length > 0 && !authError && (
                   <div
                     className="p-3 rounded-lg bg-[#B42318]/10 border border-[#B42318]/30 text-xs text-[#B42318] flex items-center gap-2"
                     role="alert"
@@ -136,10 +179,10 @@ export const SignIn: React.FC = () => {
                 <div className="pt-2">
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isLocked}
                     className="w-full h-11 text-base font-bold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 rounded-[10px]"
                   >
-                    {isSubmitting ? 'Signing in...' : 'Sign In'}
+                    {isSubmitting ? 'Signing in...' : isLocked ? `Locked (${lockoutRemainingSeconds}s)` : 'Sign In'}
                   </Button>
                 </div>
               </form>

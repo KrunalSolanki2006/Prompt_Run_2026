@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useAuth } from '@/features/auth/AuthContext'
+import { useFinance } from '@/features/store/FinanceContext'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,6 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { formatRupees } from '@/lib/format'
 import {
   User,
   Sliders,
@@ -23,30 +26,95 @@ import {
   Upload,
   RotateCcw,
   Trash2,
+  Check,
 } from 'lucide-react'
 
 export const Settings: React.FC = () => {
   useDocumentTitle('Settings')
   const navigate = useNavigate()
+  const { user, signOut, deleteAccount } = useAuth()
+  const { state, updateCycle, resetData, exportJSON, importJSON } = useFinance()
 
-  const [name, setName] = useState('Alex Sharma')
-  const [bufferPercent, setBufferPercent] = useState('10')
+  const [bufferPercent, setBufferPercent] = useState(
+    String(state.cycle?.bufferPercent ?? 10)
+  )
+  const [budgetAmount, setBudgetAmount] = useState(
+    String(state.cycle?.startingBalance ?? 10000)
+  )
+  const [cycleSavedFeedback, setCycleSavedFeedback] = useState(false)
+
   const [confirmResetOpen, setConfirmResetOpen] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [deleteEmailInput, setDeleteEmailInput] = useState('')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleSaveCycleSettings = (e: React.FormEvent) => {
+    e.preventDefault()
+    const buf = parseInt(bufferPercent, 10)
+    const bud = parseInt(budgetAmount, 10)
+
+    if (isNaN(buf) || buf < 0 || buf > 30 || isNaN(bud) || bud < 1 || bud > 1000000) {
+      return
+    }
+
+    updateCycle({
+      bufferPercent: buf,
+      startingBalance: bud,
+    })
+
+    setCycleSavedFeedback(true)
+    setTimeout(() => setCycleSavedFeedback(false), 2500)
+  }
 
   const handleExportJSON = () => {
-    // STAGE-2: Export complete FinanceState as JSON file
+    const dataStr = exportJSON()
+    const blob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `runway-backup-${Date.now()}.json`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImportError(null)
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const text = event.target?.result as string
+      const res = importJSON(text)
+      if (!res.success) {
+        setImportError(res.error ?? 'Failed to import JSON file.')
+      } else {
+        alert('Data backup successfully restored!')
+      }
+    }
+    reader.readAsText(file)
   }
 
   const handleResetData = () => {
-    // STAGE-2: Reset transactions, commitments, and goals
+    resetData()
     setConfirmResetOpen(false)
   }
 
-  const handleDeleteAccount = () => {
-    // STAGE-2: Wipe local account and all state from localStorage
+  const handleDeleteAccount = async () => {
+    setDeleteError(null)
+    const res = await deleteAccount(deleteEmailInput)
+    if (!res.success) {
+      setDeleteError(res.error ?? 'Email confirmation does not match.')
+      return
+    }
+
     setConfirmDeleteOpen(false)
-    navigate('/')
+    navigate('/', { replace: true })
   }
 
   return (
@@ -72,67 +140,134 @@ export const Settings: React.FC = () => {
             </Label>
             <Input
               id="settings-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              disabled
+              value={user?.name || 'Local User'}
               className="bg-[#FBF8F3] border-[#E6DFD2]"
             />
           </div>
 
           <div className="space-y-1">
             <Label htmlFor="settings-email" className="text-xs font-semibold text-[#16140F]">
-              Email Address (Local Only)
+              Email Address (Local Browser Only)
             </Label>
             <Input
               id="settings-email"
               disabled
-              value="alex@example.com"
+              value={user?.email || 'user@example.com'}
               className="bg-[#FBF8F3] border-[#E6DFD2] opacity-75 cursor-not-allowed"
             />
             <p className="text-[11px] text-[#5E5A52]">
-              Account credentials persist strictly in this browser.
+              Account credentials and PBKDF2 hash persist strictly inside this browser's localStorage.
             </p>
           </div>
         </div>
       </section>
 
       {/* SECTION 2: CYCLE SETTINGS */}
-      <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
-        <div className="flex items-center gap-2 pb-3 border-b border-[#E6DFD2]">
-          <Sliders className="w-4 h-4 text-[#16140F]" />
-          <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#16140F]">
-            Active Cycle Configuration
-          </h2>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-[#5E5A52]">Starting Budget:</span>
-            <span className="font-['Bricolage_Grotesque_Variable'] font-bold text-[#16140F] text-sm tabular-nums">
-              ₹10,000 (30 Days)
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="settings-buffer" className="text-xs font-semibold text-[#16140F]">
-                Safety Buffer Percentage
-              </Label>
-              <span className="text-xs font-bold text-[#16140F] bg-[#D4F23A] px-2 py-0.5 rounded">
-                {bufferPercent}% (~₹1,000)
-              </span>
+      {state.cycle && (
+        <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E6DFD2]">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-[#16140F]" />
+              <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#16140F]">
+                Active Cycle Configuration
+              </h2>
             </div>
-            <Input
-              id="settings-buffer"
-              type="number"
-              min="0"
-              max="50"
-              value={bufferPercent}
-              onChange={(e) => setBufferPercent(e.target.value)}
-              className="bg-[#FBF8F3] border-[#E6DFD2]"
-            />
+            {cycleSavedFeedback && (
+              <span className="text-xs font-semibold text-[#1D7A53] flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" />
+                <span>Saved</span>
+              </span>
+            )}
           </div>
-        </div>
-      </section>
+
+          <form onSubmit={handleSaveCycleSettings} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="settings-budget" className="text-xs font-semibold text-[#16140F]">
+                  Starting Budget (₹)
+                </Label>
+                <Input
+                  id="settings-budget"
+                  type="number"
+                  min="1"
+                  max="1000000"
+                  value={budgetAmount}
+                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  className="bg-[#FBF8F3] border-[#E6DFD2] font-bold"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="settings-buffer" className="text-xs font-semibold text-[#16140F]">
+                  Safety Buffer (0%–30%)
+                </Label>
+                <Input
+                  id="settings-buffer"
+                  type="number"
+                  min="0"
+                  max="30"
+                  value={bufferPercent}
+                  onChange={(e) => setBufferPercent(e.target.value)}
+                  className="bg-[#FBF8F3] border-[#E6DFD2]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center text-xs text-[#5E5A52] pt-1">
+              <span>
+                Cycle Start Date: <strong className="text-[#16140F]">{state.cycle.startDate}</strong> (30 days)
+              </span>
+              <Button type="submit" size="sm" className="bg-[#16140F] text-[#FBF8F3] text-xs font-bold rounded-lg h-8">
+                Update Parameters
+              </Button>
+            </div>
+          </form>
+        </section>
+      )}
+
+      {/* SECTION 2B: CYCLE HISTORY ARCHIVE */}
+      {state.cycleHistory.length > 0 && (
+        <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-[#E6DFD2]">
+            <RotateCcw className="w-4 h-4 text-[#16140F]" />
+            <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#16140F]">
+              Archived Cycle History ({state.cycleHistory.length})
+            </h2>
+          </div>
+
+          <div className="space-y-2.5">
+            {state.cycleHistory.map((h, idx) => (
+              <div
+                key={h.cycleId || idx}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#FBF8F3] border border-[#E6DFD2] text-xs"
+              >
+                <div>
+                  <span className="font-bold text-[#16140F] block">
+                    {h.startDate} → {h.endDate}
+                  </span>
+                  <span className="text-[#5E5A52] text-[11px]">
+                    Spent: {formatRupees(h.totalSpent)} · Saved in Goals: {formatRupees(h.totalSaved)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${
+                      h.finalStatus === 'surplus'
+                        ? 'bg-[#1D7A53]/15 text-[#1D7A53]'
+                        : h.finalStatus === 'balanced'
+                        ? 'bg-[#D4F23A] text-[#16140F]'
+                        : 'bg-[#B42318]/15 text-[#B42318]'
+                    }`}
+                  >
+                    {h.finalStatus}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* SECTION 3: DATA MANAGEMENT */}
       <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
@@ -142,6 +277,10 @@ export const Settings: React.FC = () => {
             Data Export & Backup
           </h2>
         </div>
+
+        {importError && (
+          <p className="text-xs font-semibold text-[#B42318]">{importError}</p>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
@@ -155,11 +294,19 @@ export const Settings: React.FC = () => {
 
           <Button
             variant="outline"
+            onClick={() => fileInputRef.current?.click()}
             className="flex-1 h-10 border-[#E6DFD2] text-xs font-semibold flex items-center justify-center gap-2"
           >
             <Upload className="w-4 h-4" />
-            <span>Import Backup</span>
+            <span>Import Backup (JSON)</span>
           </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportFile}
+            className="hidden"
+          />
         </div>
       </section>
 
@@ -177,7 +324,7 @@ export const Settings: React.FC = () => {
             <div>
               <span className="font-bold text-xs text-[#16140F] block">Reset Cycle Data</span>
               <span className="text-[11px] text-[#5E5A52]">
-                Clears all transactions, commitments, and goals while preserving account.
+                Clears all transactions, commitments, and goals while preserving account credentials.
               </span>
             </div>
             <Button
@@ -194,12 +341,16 @@ export const Settings: React.FC = () => {
             <div>
               <span className="font-bold text-xs text-[#B42318] block">Delete Account & Wipe Browser Data</span>
               <span className="text-[11px] text-[#5E5A52]">
-                Permanently destroys local keys, session tokens, and cycle snapshots.
+                Permanently destroys local keys, session tokens, and cycle data from this browser.
               </span>
             </div>
             <Button
               variant="destructive"
-              onClick={() => setConfirmDeleteOpen(true)}
+              onClick={() => {
+                setDeleteEmailInput('')
+                setDeleteError(null)
+                setConfirmDeleteOpen(true)
+              }}
               className="h-8 text-xs bg-[#B42318] text-white shrink-0"
             >
               <Trash2 className="w-3.5 h-3.5 mr-1.5" />
@@ -214,7 +365,7 @@ export const Settings: React.FC = () => {
         <Button
           variant="outline"
           onClick={() => {
-            // STAGE-2: Sign out and clear session
+            signOut()
             navigate('/sign-in')
           }}
           className="w-full h-11 border-[#E6DFD2] text-[#B42318] hover:bg-[#B42318]/10 font-bold text-xs rounded-xl flex items-center justify-center gap-2"
@@ -226,7 +377,7 @@ export const Settings: React.FC = () => {
 
       {/* CONFIRM RESET DIALOG */}
       <Dialog open={confirmResetOpen} onOpenChange={setConfirmResetOpen}>
-        <DialogContent className="max-w-md bg-white border-[#E6DFD2] rounded-[16px]">
+        <DialogContent className="max-w-md bg-white border-[#E6DFD2] rounded-2xl p-6 text-[#16140F]">
           <DialogHeader>
             <DialogTitle className="font-bold text-lg text-[#16140F]">
               Reset all cycle parameters?
@@ -246,23 +397,41 @@ export const Settings: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* CONFIRM DELETE DIALOG */}
+      {/* CONFIRM DELETE DIALOG WITH EMAIL CONFIRMATION */}
       <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
-        <DialogContent className="max-w-md bg-white border-[#E6DFD2] rounded-[16px]">
+        <DialogContent className="max-w-md bg-white border-[#E6DFD2] rounded-2xl p-6 text-[#16140F]">
           <DialogHeader>
             <DialogTitle className="font-bold text-lg text-[#B42318]">
               Delete account and purge site data?
             </DialogTitle>
             <DialogDescription className="text-xs text-[#5E5A52]">
-              Permanently purges all records stored in this browser's localStorage. You will be redirected to the landing page.
+              To confirm permanent deletion, please type your registered email address ({user?.email}):
             </DialogDescription>
           </DialogHeader>
+
+          <div className="space-y-2 my-2">
+            <Input
+              type="email"
+              value={deleteEmailInput}
+              onChange={(e) => setDeleteEmailInput(e.target.value)}
+              placeholder={user?.email}
+              className="bg-[#FBF8F3] border-[#E6DFD2] text-xs"
+            />
+            {deleteError && (
+              <p className="text-xs font-semibold text-[#B42318]">{deleteError}</p>
+            )}
+          </div>
+
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)} className="border-[#E6DFD2] text-xs">
               Cancel
             </Button>
-            <Button onClick={handleDeleteAccount} className="bg-[#B42318] text-white text-xs font-bold">
-              Permanently Delete
+            <Button
+              onClick={handleDeleteAccount}
+              disabled={deleteEmailInput.trim().toLowerCase() !== user?.email}
+              className="bg-[#B42318] text-white text-xs font-bold"
+            >
+              Permanently Delete Account
             </Button>
           </DialogFooter>
         </DialogContent>

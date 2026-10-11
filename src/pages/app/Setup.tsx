@@ -3,17 +3,20 @@ import { useNavigate } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { cycleSetupSchema, type CycleSetupFormData } from '@/features/setup/schemas'
+import { useFinance } from '@/features/store/FinanceContext'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { PageHeader } from '@/components/PageHeader'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { todayISO } from '@/engine/dates'
+import type { Cycle } from '@/engine/types'
 import { Sparkles, Calendar, ShieldCheck, ArrowRight } from 'lucide-react'
 
 export const Setup: React.FC = () => {
   useDocumentTitle('Cycle Setup')
   const navigate = useNavigate()
+  const { initCycle } = useFinance()
 
   const {
     register,
@@ -34,9 +37,18 @@ export const Setup: React.FC = () => {
   const currentBuffer = watch('bufferPercent') || 10
   const bufferAmount = Math.round((Number(currentBudget) * Number(currentBuffer)) / 100)
 
-  const onSubmit = async (_data: CycleSetupFormData) => {
-    // STAGE-2: Initialize cycle state in localStorage and redirect to /app
-    navigate('/app')
+  const onSubmit = async (data: CycleSetupFormData) => {
+    const newCycle: Cycle = {
+      id: `cycle_${Date.now()}`,
+      startDate: data.startDate,
+      lengthDays: 30,
+      startingBalance: data.startingBalance,
+      bufferPercent: data.bufferPercent,
+      status: 'active',
+    }
+
+    initCycle(newCycle)
+    navigate('/app', { replace: true })
   }
 
   return (
@@ -76,7 +88,7 @@ export const Setup: React.FC = () => {
               <Input
                 id="setup-budget"
                 type="number"
-                min="1000"
+                min="1"
                 max="1000000"
                 step="1"
                 placeholder="10000"
@@ -136,7 +148,7 @@ export const Setup: React.FC = () => {
               id="setup-buffer"
               type="number"
               min="0"
-              max="50"
+              max="30"
               step="1"
               placeholder="10"
               className="h-12 text-base bg-[#FBF8F3] border-[#E6DFD2] rounded-[10px]"

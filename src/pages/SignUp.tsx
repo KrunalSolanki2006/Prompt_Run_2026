@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate, Navigate } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signUpSchema, type SignUpFormData } from '@/features/auth/schemas'
+import { useAuth } from '@/features/auth/AuthContext'
 import { Logo } from '@/components/Logo'
 import { ConsequenceChain } from '@/components/ConsequenceChain'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -15,6 +16,10 @@ export const SignUp: React.FC = () => {
   useDocumentTitle('Create Account')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  const { user, signUp } = useAuth()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -26,17 +31,28 @@ export const SignUp: React.FC = () => {
     mode: 'onChange',
   })
 
+  // Redirect if already authenticated
+  if (user) {
+    return <Navigate to="/app" replace />
+  }
+
   const passwordVal = watch('password') || ''
 
   // Live password strength calculation
-  const hasMinLength = passwordVal.length >= 8
-  const hasUppercase = /[A-Z]/.test(passwordVal)
+  const hasMinLength = passwordVal.length >= 10
+  const hasLetter = /[A-Za-z]/.test(passwordVal)
   const hasNumber = /[0-9]/.test(passwordVal)
-  const strengthScore = [hasMinLength, hasUppercase, hasNumber].filter(Boolean).length
+  const strengthScore = [hasMinLength, hasLetter, hasNumber].filter(Boolean).length
 
-  const onSubmit = async (_data: SignUpFormData) => {
-    // STAGE-2: Real client-side account creation in localStorage
-    // Password will be salted and hashed with PBKDF2/SHA-256 before storing in runway:v1:accounts
+  const onSubmit = async (data: SignUpFormData) => {
+    setAuthError(null)
+    const result = await signUp(data.name, data.email, data.password)
+    if (!result.success) {
+      setAuthError(result.error ?? 'Failed to create local account.')
+    } else {
+      // Auto sign-in and redirect to /app/setup
+      navigate('/app/setup', { replace: true })
+    }
   }
 
   return (
@@ -72,12 +88,17 @@ export const SignUp: React.FC = () => {
               </div>
 
               {/* Error summary live region */}
-              <div
-                aria-live="polite"
-                aria-atomic="true"
-                className="mb-4"
-              >
-                {Object.keys(errors).length > 0 && (
+              <div aria-live="polite" aria-atomic="true" className="mb-4">
+                {authError && (
+                  <div
+                    className="p-3 rounded-lg bg-[#B42318]/10 border border-[#B42318]/30 text-xs text-[#B42318] flex items-center gap-2"
+                    role="alert"
+                  >
+                    <ShieldAlert className="w-4 h-4 shrink-0" />
+                    <span>{authError}</span>
+                  </div>
+                )}
+                {Object.keys(errors).length > 0 && !authError && (
                   <div
                     className="p-3 rounded-lg bg-[#B42318]/10 border border-[#B42318]/30 text-xs text-[#B42318] flex items-center gap-2"
                     role="alert"
@@ -150,7 +171,7 @@ export const SignUp: React.FC = () => {
                       id="signup-pass"
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
-                      placeholder="At least 8 characters"
+                      placeholder="At least 10 characters with letter and number"
                       className="pl-9 pr-10 h-11 text-base bg-[#FBF8F3] border-[#E6DFD2] rounded-[10px]"
                       aria-invalid={!!errors.password}
                       aria-describedby="signup-pass-strength"
@@ -187,10 +208,10 @@ export const SignUp: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between text-[10px] text-[#5E5A52] pt-0.5">
                       <span className={hasMinLength ? 'text-[#1D7A53] font-semibold flex items-center gap-0.5' : ''}>
-                        {hasMinLength && <Check className="w-3 h-3" />} 8+ chars
+                        {hasMinLength && <Check className="w-3 h-3" />} 10+ chars
                       </span>
-                      <span className={hasUppercase ? 'text-[#1D7A53] font-semibold flex items-center gap-0.5' : ''}>
-                        {hasUppercase && <Check className="w-3 h-3" />} Uppercase
+                      <span className={hasLetter ? 'text-[#1D7A53] font-semibold flex items-center gap-0.5' : ''}>
+                        {hasLetter && <Check className="w-3 h-3" />} Letter
                       </span>
                       <span className={hasNumber ? 'text-[#1D7A53] font-semibold flex items-center gap-0.5' : ''}>
                         {hasNumber && <Check className="w-3 h-3" />} Number
@@ -272,8 +293,8 @@ export const SignUp: React.FC = () => {
             </div>
 
             <div className="bg-white border border-[#E6DFD2] rounded-xl p-3.5 text-[11px] text-[#5E5A52]">
-              <span className="font-bold text-[#16140F] block mb-0.5">Stage 1 Notice</span>
-              Forms are strictly validated via Zod. Local authentication storage binds in Stage 2.
+              <span className="font-bold text-[#16140F] block mb-0.5">Local-First Privacy</span>
+              Passwords are salted and derived with 600,000 PBKDF2 iterations using Web Crypto API.
             </div>
           </div>
         </div>

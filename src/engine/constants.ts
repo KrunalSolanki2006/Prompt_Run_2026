@@ -3,6 +3,7 @@ import type { CategoryId, RiskLevel } from './types'
 export const CYCLE_LENGTH_DAYS = 30
 export const DEFAULT_BUDGET = 10000
 export const DEFAULT_BUFFER_PERCENT = 10
+export const MAX_SAFE_BUDGET = 1000000
 
 export const RISK_THRESHOLDS: Record<RiskLevel, { maxScore: number; label: string; description: string }> = {
   low: {
@@ -45,9 +46,26 @@ export const CATEGORIES: Array<{
   { id: 'other', label: 'Other', description: 'Miscellaneous uncategorized expenses' },
 ]
 
+export const RISK_WEIGHTS = {
+  liquidity: 35,
+  pace: 25,
+  obligationLoad: 15,
+  buffer: 15,
+  incomeDependency: 10,
+} as const
+
 export const HEALTH_WEIGHTS = {
-  runwayBuffer: 0.35,
-  obligationCoverage: 0.25,
-  savingsProgress: 0.20,
-  spendDiscipline: 0.20,
+  budgetAdherence: 25,
+  outlook: 20,
+  bufferProtection: 15,
+  goalProgress: 15,
+  billsOnTime: 15,
+  subscriptionLoad: 10,
+} as const
+
+export const FORECAST_CONSTANTS = {
+  pessimisticRunRateMultiplier: 1.25,
+  observedWeight: 0.4,
+  last7Weight: 0.6,
+  rampDays: 7,
 } as const

@@ -5,19 +5,21 @@ export const signUpSchema = z
   .object({
     name: z
       .string()
-      .transform(cleanText(50))
-      .refine((v) => v.length >= 2, 'Name must be at least 2 characters'),
+      .transform(cleanText(60))
+      .refine((v) => v.length >= 2, 'Name must be at least 2 characters')
+      .refine((v) => v.length <= 60, 'Name must be at most 60 characters'),
     email: z
       .string()
       .trim()
       .toLowerCase()
+      .max(254, 'Email must be at most 254 characters')
       .email('Please enter a valid email address'),
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Must include at least one uppercase letter')
-      .regex(/[0-9]/, 'Must include at least one number'),
-    confirmPassword: z.string().min(1, 'Confirm your password'),
+      .min(10, 'Password must be at least 10 characters')
+      .regex(/[A-Za-z]/, 'Password must include at least one letter')
+      .regex(/[0-9]/, 'Password must include at least one number'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -31,6 +33,7 @@ export const signInSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
+    .max(254, 'Email must be at most 254 characters')
     .email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 })

@@ -1,17 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useFinance } from '@/features/store/FinanceContext'
 import { PageHeader } from '@/components/PageHeader'
 import { EmptyState } from '@/components/EmptyState'
+import { CategoryIcon } from '@/components/CategoryIcon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { CATEGORIES } from '@/engine/constants'
-import { ReceiptText, Download, Search, Plus } from 'lucide-react'
-import type { Transaction } from '@/engine/types'
+import { formatRupees } from '@/lib/format'
+import { generateCSV } from '@/lib/csv'
+import {
+  ReceiptText,
+  Download,
+  Search,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react'
 
 export const Activity: React.FC = () => {
   useDocumentTitle('Activity Ledger')
+  const { state, deleteTransaction } = useFinance()
+
   const [search, setSearch] = useState('')
   const [kindFilter, setKindFilter] = useState('all')
   const [catFilter, setCatFilter] = useState('all')
@@ -19,11 +30,96 @@ export const Activity: React.FC = () => {
   const [unexpectedOnly, setUnexpectedOnly] = useState(false)
   const [sortBy, setSortBy] = useState('date-desc')
 
-  // STAGE-1: Static transaction list is empty. Real transactions load in Stage 2.
-  const transactions: Transaction[] = []
+  // Filter & sort transactions
+  const filteredTransactions = useMemo(() => {
+    let list = [...state.transactions]
+
+    // Search query
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      list = list.filter(
+        (t) =>
+          t.note.toLowerCase().includes(q) ||
+          t.category.toLowerCase().includes(q)
+      )
+    }
+
+    // Kind filter
+    if (kindFilter !== 'all') {
+      list = list.filter((t) => t.kind === kindFilter)
+    }
+
+    // Category filter
+    if (catFilter !== 'all') {
+      list = list.filter((t) => t.category === catFilter)
+    }
+
+    // Tag filter
+    if (tagFilter !== 'all') {
+      list = list.filter((t) => t.tag === tagFilter)
+    }
+
+    // Unexpected filter
+    if (unexpectedOnly) {
+      list = list.filter((t) => t.unexpected)
+    }
+
+    // Sorting
+    list.sort((a, b) => {
+      if (sortBy === 'date-desc') {
+        return b.date.localeCompare(a.date)
+      } else if (sortBy === 'date-asc') {
+        return a.date.localeCompare(b.date)
+      } else if (sortBy === 'amount-desc') {
+        return b.amount - a.amount
+      } else if (sortBy === 'amount-asc') {
+        return a.amount - b.amount
+      }
+      return 0
+    })
+
+    return list
+  }, [
+    state.transactions,
+    search,
+    kindFilter,
+    catFilter,
+    tagFilter,
+    unexpectedOnly,
+    sortBy,
+  ])
 
   const handleExportCSV = () => {
-    // STAGE-2: Generate and download real CSV ledger file
+    const headers = [
+      'Date',
+      'Kind',
+      'Category',
+      'Description',
+      'Tag',
+      'Unexpected',
+      'Amount (Rupees)',
+    ]
+
+    const rows = filteredTransactions.map((t) => [
+      t.date,
+      t.kind,
+      t.category,
+      t.note,
+      t.tag,
+      t.unexpected ? 'Yes' : 'No',
+      t.amount,
+    ])
+
+    const csvContent = generateCSV(headers, rows)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `runway-activity-${Date.now()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -34,6 +130,7 @@ export const Activity: React.FC = () => {
         actions={
           <Button
             variant="outline"
+            disabled={state.transactions.length === 0}
             onClick={handleExportCSV}
             className="h-9 border-[#E6DFD2] text-xs font-semibold rounded-lg flex items-center gap-1.5"
           >
@@ -53,7 +150,7 @@ export const Activity: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by note or description..."
-              className="pl-9 h-10 bg-[#FBF8F3] border-[#E6DFD2] text-sm"
+              className="pl-9 h-10 bg-[#FBF8F3] border-[#E6DFD2] text-xs"
             />
           </div>
 
@@ -106,8 +203,8 @@ export const Activity: React.FC = () => {
         </div>
 
         {/* Secondary Filters */}
-        <div className="flex items-center justify-between pt-2 border-t border-[#E6DFD2]/60 text-xs">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E6DFD2]/60 text-xs">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-2">
               <Checkbox
                 id="filter-unexpected"
@@ -143,13 +240,13 @@ export const Activity: React.FC = () => {
           </div>
 
           <span className="text-[#5E5A52] text-[11px]">
-            {transactions.length} recorded items
+            {filteredTransactions.length} of {state.transactions.length} items shown
           </span>
         </div>
       </div>
 
-      {/* TABLE ON DESKTOP / CARDS ON MOBILE / EMPTY STATE */}
-      {transactions.length > 0 ? (
+      {/* TRANSACTIONS LIST */}
+      {filteredTransactions.length > 0 ? (
         <div className="bg-white border border-[#E6DFD2] rounded-[14px] overflow-hidden shadow-xs">
           {/* Desktop Table */}
           <table className="hidden md:table w-full text-xs text-left">
@@ -159,26 +256,135 @@ export const Activity: React.FC = () => {
                 <th className="py-3 px-4 font-semibold">Date</th>
                 <th className="py-3 px-4 font-semibold">Description</th>
                 <th className="py-3 px-4 font-semibold">Category</th>
-                <th className="py-3 px-4 font-semibold">Tag</th>
+                <th className="py-3 px-4 font-semibold">Classification</th>
                 <th className="py-3 px-4 font-semibold text-right">Amount</th>
+                <th className="py-3 px-4 font-semibold text-center w-12">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {/* Transactions mapped in Stage 2 */}
+            <tbody className="divide-y divide-[#E6DFD2]">
+              {filteredTransactions.map((t) => (
+                <tr key={t.id} className="hover:bg-[#FBF8F3]/50 transition-colors">
+                  <td className="py-3 px-4 font-mono text-[11px] text-[#5E5A52]">
+                    {t.date}
+                  </td>
+                  <td className="py-3 px-4 font-semibold text-[#16140F]">
+                    <div className="flex items-center gap-2">
+                      <span>{t.note || t.category}</span>
+                      {t.unexpected && (
+                        <span className="text-[10px] font-bold text-[#A15C07] bg-[#A15C07]/10 px-1.5 py-0.2 rounded flex items-center gap-0.5">
+                          <AlertTriangle className="w-2.5 h-2.5" />
+                          <span>Emergency</span>
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 capitalize text-[#5E5A52]">
+                    <div className="flex items-center gap-1.5">
+                      <CategoryIcon category={t.category} size="sm" />
+                      <span>{t.category}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        t.tag === 'need'
+                          ? 'bg-[#16140F]/10 text-[#16140F]'
+                          : 'bg-[#5E5A52]/10 text-[#5E5A52]'
+                      }`}
+                    >
+                      {t.tag.toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 font-['Bricolage_Grotesque_Variable'] font-bold text-sm text-right tabular-nums">
+                    <span
+                      className={
+                        t.kind === 'income'
+                          ? 'text-[#1D7A53]'
+                          : 'text-[#16140F]'
+                      }
+                    >
+                      {t.kind === 'income' ? '+' : '-'}
+                      {formatRupees(t.amount)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm(`Delete transaction "${t.note || t.category}"?`)) {
+                          deleteTransaction(t.id)
+                        }
+                      }}
+                      className="p-1 text-[#5E5A52] hover:text-[#B42318] transition-colors"
+                      aria-label="Delete transaction"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden divide-y divide-[#E6DFD2]">
+            {filteredTransactions.map((t) => (
+              <div key={t.id} className="p-4 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="font-bold text-xs text-[#16140F] block">
+                      {t.note || t.category}
+                    </span>
+                    <span className="text-[11px] text-[#5E5A52]">
+                      {t.date} · {t.category}
+                    </span>
+                  </div>
+                  <span
+                    className={`font-['Bricolage_Grotesque_Variable'] font-bold text-sm ${
+                      t.kind === 'income' ? 'text-[#1D7A53]' : 'text-[#16140F]'
+                    }`}
+                  >
+                    {t.kind === 'income' ? '+' : '-'}
+                    {formatRupees(t.amount)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-1 text-[11px]">
+                  <div className="flex gap-1.5">
+                    <span className="font-bold bg-[#FBF8F3] px-1.5 py-0.5 rounded text-[10px]">
+                      {t.tag.toUpperCase()}
+                    </span>
+                    {t.unexpected && (
+                      <span className="font-bold text-[#A15C07] bg-[#A15C07]/10 px-1.5 py-0.5 rounded text-[10px]">
+                        Emergency
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Delete transaction "${t.note || t.category}"?`)) {
+                        deleteTransaction(t.id)
+                      }
+                    }}
+                    className="text-[#B42318] text-xs font-semibold"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <EmptyState
           icon={<ReceiptText className="w-6 h-6 text-[#5E5A52]" />}
-          title="No transactions logged yet"
-          description="Your activity ledger tracks real expenses and incoming money to compute your daily burn rate."
-          action={
-            <Button className="h-9 bg-[#16140F] text-[#FBF8F3] text-xs font-bold rounded-lg flex items-center gap-1.5">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Log First Expense</span>
-            </Button>
+          title="No transactions match your filters"
+          description={
+            state.transactions.length === 0
+              ? 'No transactions logged yet in this cycle. Use the "Add" button to log an expense or income.'
+              : 'Try clearing your search term or filter criteria.'
           }
+          receiptBorder={false}
         />
       )}
     </div>
