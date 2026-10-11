@@ -7,25 +7,16 @@ import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
+import { SettingsDangerZone } from './settings/SettingsDangerZone'
 import { formatRupees } from '@/lib/format'
 import {
   User,
   Sliders,
   Database,
-  AlertOctagon,
   LogOut,
   Download,
   Upload,
   RotateCcw,
-  Trash2,
   Check,
 } from 'lucide-react'
 
@@ -42,11 +33,6 @@ export const Settings: React.FC = () => {
     String(state.cycle?.startingBalance ?? 10000)
   )
   const [cycleSavedFeedback, setCycleSavedFeedback] = useState(false)
-
-  const [confirmResetOpen, setConfirmResetOpen] = useState(false)
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
-  const [deleteEmailInput, setDeleteEmailInput] = useState('')
-  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -100,21 +86,13 @@ export const Settings: React.FC = () => {
     reader.readAsText(file)
   }
 
-  const handleResetData = () => {
-    resetData()
-    setConfirmResetOpen(false)
-  }
-
-  const handleDeleteAccount = async () => {
-    setDeleteError(null)
-    const res = await deleteAccount(deleteEmailInput)
-    if (!res.success) {
-      setDeleteError(res.error ?? 'Email confirmation does not match.')
-      return
+  const handleDeleteAccountConfirm = async () => {
+    if (!user) return { success: false, error: 'Not logged in.' }
+    const res = await deleteAccount(user.email)
+    if (res.success) {
+      navigate('/', { replace: true })
     }
-
-    setConfirmDeleteOpen(false)
-    navigate('/', { replace: true })
+    return res
   }
 
   return (
@@ -141,36 +119,39 @@ export const Settings: React.FC = () => {
             <Input
               id="settings-name"
               disabled
-              value={user?.name || 'Local User'}
-              className="bg-[#FBF8F3] border-[#E6DFD2]"
+              value={user?.name ?? 'User'}
+              className="bg-[#FBF8F3] border-[#E6DFD2] text-xs font-semibold opacity-80"
             />
           </div>
 
           <div className="space-y-1">
             <Label htmlFor="settings-email" className="text-xs font-semibold text-[#16140F]">
-              Email Address (Local Browser Only)
+              Email Address
             </Label>
             <Input
               id="settings-email"
               disabled
-              value={user?.email || 'user@example.com'}
-              className="bg-[#FBF8F3] border-[#E6DFD2] opacity-75 cursor-not-allowed"
+              value={user?.email ?? 'user@example.com'}
+              className="bg-[#FBF8F3] border-[#E6DFD2] text-xs font-semibold opacity-80"
             />
-            <p className="text-[11px] text-[#5E5A52]">
-              Account credentials and PBKDF2 hash persist strictly inside this browser's localStorage.
+          </div>
+
+          <div className="p-3 rounded-xl bg-[#FBF8F3] border border-[#E6DFD2] text-xs text-[#5E5A52]">
+            <p>
+              Your credentials are securely hashed locally with PBKDF2-SHA256 and salted per-account. No passwords ever leave your machine.
             </p>
           </div>
         </div>
       </section>
 
-      {/* SECTION 2: CYCLE SETTINGS */}
+      {/* SECTION 2: CYCLE PREFERENCES */}
       {state.cycle && (
         <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[#E6DFD2]">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-[#16140F]" />
               <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#16140F]">
-                Active Cycle Configuration
+                30-Day Cycle Parameters
               </h2>
             </div>
             {cycleSavedFeedback && (
@@ -185,11 +166,12 @@ export const Settings: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label htmlFor="settings-budget" className="text-xs font-semibold text-[#16140F]">
-                  Starting Budget (₹)
+                  Cycle Budget (₹)
                 </Label>
                 <Input
                   id="settings-budget"
                   type="number"
+                  inputMode="numeric"
                   min="1"
                   max="1000000"
                   value={budgetAmount}
@@ -205,6 +187,7 @@ export const Settings: React.FC = () => {
                 <Input
                   id="settings-buffer"
                   type="number"
+                  inputMode="numeric"
                   min="0"
                   max="30"
                   value={bufferPercent}
@@ -311,54 +294,11 @@ export const Settings: React.FC = () => {
       </section>
 
       {/* SECTION 4: DANGER ZONE */}
-      <section className="bg-white border border-[#B42318]/30 rounded-[16px] p-6 shadow-xs space-y-4">
-        <div className="flex items-center gap-2 pb-3 border-b border-[#B42318]/20">
-          <AlertOctagon className="w-4 h-4 text-[#B42318]" />
-          <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#B42318]">
-            Danger Zone
-          </h2>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-[#FBF8F3] border border-[#E6DFD2]">
-            <div>
-              <span className="font-bold text-xs text-[#16140F] block">Reset Cycle Data</span>
-              <span className="text-[11px] text-[#5E5A52]">
-                Clears all transactions, commitments, and goals while preserving account credentials.
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmResetOpen(true)}
-              className="h-8 text-xs text-[#C2410C] border-[#C2410C]/30 hover:bg-[#C2410C]/10 shrink-0"
-            >
-              <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-              <span>Reset Data</span>
-            </Button>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-[#B42318]/5 border border-[#B42318]/20">
-            <div>
-              <span className="font-bold text-xs text-[#B42318] block">Delete Account & Wipe Browser Data</span>
-              <span className="text-[11px] text-[#5E5A52]">
-                Permanently destroys local keys, session tokens, and cycle data from this browser.
-              </span>
-            </div>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setDeleteEmailInput('')
-                setDeleteError(null)
-                setConfirmDeleteOpen(true)
-              }}
-              className="h-8 text-xs bg-[#B42318] text-white shrink-0"
-            >
-              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-              <span>Delete Account</span>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <SettingsDangerZone
+        userEmail={user?.email}
+        onResetData={resetData}
+        onDeleteAccount={handleDeleteAccountConfirm}
+      />
 
       {/* SIGN OUT */}
       <div className="pt-2">
@@ -374,69 +314,8 @@ export const Settings: React.FC = () => {
           <span>Sign Out of Current Session</span>
         </Button>
       </div>
-
-      {/* CONFIRM RESET DIALOG */}
-      <Dialog open={confirmResetOpen} onOpenChange={setConfirmResetOpen}>
-        <DialogContent className="max-w-md bg-white border-[#E6DFD2] rounded-2xl p-6 text-[#16140F]">
-          <DialogHeader>
-            <DialogTitle className="font-bold text-lg text-[#16140F]">
-              Reset all cycle parameters?
-            </DialogTitle>
-            <DialogDescription className="text-xs text-[#5E5A52]">
-              This removes all logged transactions, commitments, and goal records. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setConfirmResetOpen(false)} className="border-[#E6DFD2] text-xs">
-              Cancel
-            </Button>
-            <Button onClick={handleResetData} className="bg-[#C2410C] text-white text-xs font-bold">
-              Confirm Reset
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* CONFIRM DELETE DIALOG WITH EMAIL CONFIRMATION */}
-      <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
-        <DialogContent className="max-w-md bg-white border-[#E6DFD2] rounded-2xl p-6 text-[#16140F]">
-          <DialogHeader>
-            <DialogTitle className="font-bold text-lg text-[#B42318]">
-              Delete account and purge site data?
-            </DialogTitle>
-            <DialogDescription className="text-xs text-[#5E5A52]">
-              To confirm permanent deletion, please type your registered email address ({user?.email}):
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-2 my-2">
-            <Input
-              type="email"
-              value={deleteEmailInput}
-              onChange={(e) => setDeleteEmailInput(e.target.value)}
-              placeholder={user?.email}
-              className="bg-[#FBF8F3] border-[#E6DFD2] text-xs"
-            />
-            {deleteError && (
-              <p className="text-xs font-semibold text-[#B42318]">{deleteError}</p>
-            )}
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)} className="border-[#E6DFD2] text-xs">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDeleteAccount}
-              disabled={deleteEmailInput.trim().toLowerCase() !== user?.email}
-              className="bg-[#B42318] text-white text-xs font-bold"
-            >
-              Permanently Delete Account
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
+
 export default Settings
