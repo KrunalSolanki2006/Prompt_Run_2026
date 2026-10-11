@@ -71,9 +71,9 @@ export const SignUp: React.FC = () => {
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12">
-        <div className="w-full max-w-5xl bg-white border border-[#E6DFD2] rounded-[18px] shadow-xs overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        <div className="w-full max-w-md md:max-w-xl lg:max-w-5xl bg-white border border-[#E6DFD2] rounded-[18px] shadow-xs overflow-hidden grid grid-cols-1 lg:grid-cols-12 animate-pop-up">
           {/* Form Side */}
-          <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between">
+          <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between animate-slide-in-left">
             <div>
               <div className="mb-8">
                 <span className="text-xs font-bold text-[#5E5A52] uppercase tracking-wider block mb-1">
@@ -278,7 +278,7 @@ export const SignUp: React.FC = () => {
           </div>
 
           {/* Brand Visual Side (Desktop only) */}
-          <div className="hidden lg:flex lg:col-span-5 bg-[#FBF8F3] border-l border-[#E6DFD2] p-8 flex-col justify-between">
+          <div className="hidden lg:flex lg:col-span-5 bg-[#FBF8F3] border-l border-[#E6DFD2] p-8 flex-col justify-between animate-slide-in-right">
             <div>
               <span className="text-xs font-bold text-[#5E5A52] uppercase tracking-wider block mb-2">
                 Pure Cash-Flow Engine

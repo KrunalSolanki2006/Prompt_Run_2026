@@ -103,7 +103,7 @@ export const Settings: React.FC = () => {
       />
 
       {/* SECTION 1: PROFILE */}
-      <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
+      <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4 animate-pop-up">
         <div className="flex items-center gap-2 pb-3 border-b border-[#E6DFD2]">
           <User className="w-4 h-4 text-[#16140F]" />
           <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#16140F]">
@@ -146,7 +146,7 @@ export const Settings: React.FC = () => {
 
       {/* SECTION 2: CYCLE PREFERENCES */}
       {state.cycle && (
-        <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
+        <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4 animate-slide-in-left">
           <div className="flex items-center justify-between pb-3 border-b border-[#E6DFD2]">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-[#16140F]" />
@@ -211,7 +211,7 @@ export const Settings: React.FC = () => {
 
       {/* SECTION 2B: CYCLE HISTORY ARCHIVE */}
       {state.cycleHistory.length > 0 && (
-        <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
+        <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4 animate-slide-in-right">
           <div className="flex items-center gap-2 pb-3 border-b border-[#E6DFD2]">
             <RotateCcw className="w-4 h-4 text-[#16140F]" />
             <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#16140F]">
@@ -253,7 +253,7 @@ export const Settings: React.FC = () => {
       )}
 
       {/* SECTION 3: DATA MANAGEMENT */}
-      <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4">
+      <section className="bg-white border border-[#E6DFD2] rounded-[16px] p-6 shadow-xs space-y-4 animate-pop-up">
         <div className="flex items-center gap-2 pb-3 border-b border-[#E6DFD2]">
           <Database className="w-4 h-4 text-[#16140F]" />
           <h2 className="font-['Bricolage_Grotesque_Variable'] text-base font-bold text-[#16140F]">

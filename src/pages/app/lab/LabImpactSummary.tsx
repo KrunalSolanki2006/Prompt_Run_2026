@@ -116,7 +116,7 @@ export const LabImpactSummary: React.FC<LabImpactSummaryProps> = ({
         </span>
 
         {hasDecisions ? (
-          <div className="space-y-3">
+          <div className="space-y-3 animate-pop-up">
             {/* Output 1: Liquid Wallet */}
             <div className="flex items-center justify-between text-xs">
               <span className="text-[#5E5A52]">1. Liquid Wallet:</span>

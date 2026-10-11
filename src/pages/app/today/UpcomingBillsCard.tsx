@@ -77,17 +77,20 @@ export const UpcomingBillsCard: React.FC<UpcomingBillsCardProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <span className="font-['Bricolage_Grotesque_Variable'] font-bold text-xs tabular-nums text-[#16140F]">
                   <Money amount={occ.amount} />
                 </span>
                 <Button
                   size="sm"
                   onClick={() => onSettle(occ)}
-                  className="h-7 px-2.5 text-[11px] font-semibold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/85 rounded-lg"
+                  className="h-7 px-2 sm:px-2.5 text-[11px] font-semibold bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/85 rounded-lg"
                 >
-                  <Check className="w-3 h-3 mr-1 text-[#D4F23A]" />
-                  <span>{occ.type === 'income' ? 'Mark Received' : 'Mark Paid'}</span>
+                  <Check className="w-3 h-3 mr-1 text-[#D4F23A] shrink-0" />
+                  <span>
+                    <span className="hidden sm:inline">Mark </span>
+                    {occ.type === 'income' ? 'Received' : 'Paid'}
+                  </span>
                 </Button>
               </div>
             </div>

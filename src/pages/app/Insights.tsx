@@ -121,7 +121,7 @@ export const Insights: React.FC = () => {
       </div>
 
       {/* SECTION 1: RUNWAY FORECAST */}
-      <section className="space-y-3">
+      <section className="space-y-3 animate-pop-up">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-[#16140F]" />
           <h2 className="font-['Bricolage_Grotesque_Variable'] text-lg font-bold text-[#16140F]">
@@ -137,7 +137,7 @@ export const Insights: React.FC = () => {
       {/* SECTION 2 & 3: RISK DRIVERS & HEALTH BREAKDOWN */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Risk Drivers */}
-        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-5">
+        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-5 animate-slide-in-left">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-[#C2410C]" />
@@ -186,7 +186,7 @@ export const Insights: React.FC = () => {
         </div>
 
         {/* Health Breakdown */}
-        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-5">
+        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-5 animate-slide-in-right">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <HeartPulse className="w-4 h-4 text-[#1D7A53]" />
@@ -229,7 +229,7 @@ export const Insights: React.FC = () => {
       {/* SECTION 4 & 5: SPENDING BY CATEGORY & DAILY SPEND CHART */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Spending By Category & Needs vs Wants */}
-        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-5">
+        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-5 animate-slide-in-left">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <PieChart className="w-4 h-4 text-[#16140F]" />
@@ -305,11 +305,12 @@ export const Insights: React.FC = () => {
         <DailySpendChart
           data={dailySpendData}
           title="Daily Spend vs Daily Allowance"
+          className="animate-slide-in-right"
         />
       </div>
 
       {/* SECTION 6: HOW SCORES WORK (ACCORDION CODIFIED FROM CONSTANTS) */}
-      <section className="bg-white border border-[#E6DFD2] rounded-[18px] p-6 shadow-xs">
+      <section className="bg-white border border-[#E6DFD2] rounded-[18px] p-6 shadow-xs animate-pop-up">
         <div className="flex items-center gap-2 mb-2">
           <HelpCircle className="w-5 h-5 text-[#16140F]" />
           <h2 className="font-['Bricolage_Grotesque_Variable'] text-xl font-bold text-[#16140F]">

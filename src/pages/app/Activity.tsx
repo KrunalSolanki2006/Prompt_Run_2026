@@ -141,7 +141,7 @@ export const Activity: React.FC = () => {
       />
 
       {/* FILTER & SEARCH BAR */}
-      <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 shadow-xs space-y-3">
+      <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 shadow-xs space-y-3 animate-slide-in-left">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Search */}
           <div className="sm:col-span-5 relative">
@@ -247,7 +247,7 @@ export const Activity: React.FC = () => {
 
       {/* TRANSACTIONS LIST */}
       {filteredTransactions.length > 0 ? (
-        <div className="bg-white border border-[#E6DFD2] rounded-[14px] overflow-hidden shadow-xs">
+        <div className="bg-white border border-[#E6DFD2] rounded-[14px] overflow-hidden shadow-xs animate-pop-up">
           {/* Desktop Table */}
           <table className="hidden md:table w-full text-xs text-left">
             <caption className="sr-only">Detailed activity ledger transactions</caption>

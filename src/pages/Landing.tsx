@@ -83,14 +83,14 @@ export const Landing: React.FC = () => {
         {/* HERO SECTION */}
         <section className="pt-12 sm:pt-20 pb-16 px-4 sm:px-6 max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7 animate-slide-in-left">
               <div className="inline-flex items-center gap-2 bg-white border border-[#E6DFD2] rounded-full px-3 py-1 text-xs font-semibold text-[#16140F] mb-6">
                 <span className="w-2 h-2 rounded-full bg-[#1D7A53] animate-pulse" />
                 <span>Prompt Run 2026 Challenge Cockpit</span>
               </div>
 
               {/* H1 rendered immediately without opacity 0 to protect LCP */}
-              <h1 className="font-['Bricolage_Grotesque_Variable'] text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#16140F] leading-[1.08] mb-6">
+              <h1 className="font-['Bricolage_Grotesque_Variable'] text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#16140F] leading-[1.08] mb-6">
                 Make <span className="bg-[#D4F23A] px-2 py-0.5 rounded-md">₹10,000</span> last 30 days.
               </h1>
 
@@ -115,7 +115,7 @@ export const Landing: React.FC = () => {
                 </Link>
               </div>
 
-              <div className="flex items-center gap-6 text-xs text-[#5E5A52] font-medium pt-2">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#5E5A52] font-medium pt-2">
                 <span className="flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-[#1D7A53]" /> 100% Local in browser
                 </span>
@@ -128,7 +128,7 @@ export const Landing: React.FC = () => {
               </div>
             </div>
 
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 animate-slide-in-right">
               <ConsequenceChain />
             </div>
           </div>
@@ -146,7 +146,7 @@ export const Landing: React.FC = () => {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
                   step: '01',
@@ -172,10 +172,11 @@ export const Landing: React.FC = () => {
                   desc: 'Instantly view before/after changes to your daily allowance, savings deadlines, risk meters, and 30-day forecast.',
                   icon: <Activity className="w-5 h-5" />,
                 },
-              ].map((item) => (
+              ].map((item, idx) => (
                 <div
                   key={item.step}
-                  className="bg-[#FBF8F3] border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between"
+                  className="bg-[#FBF8F3] border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-200 shadow-xs animate-pop-up"
+                  style={{ animationDelay: `${idx * 0.06}s` }}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
@@ -215,7 +216,7 @@ export const Landing: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Feature 1: Daily Allowance (Prominent span) */}
-            <div className="md:col-span-2 bg-white border border-[#E6DFD2] rounded-[14px] p-6.5 flex flex-col justify-between">
+            <div className="md:col-span-2 bg-white border border-[#E6DFD2] rounded-[14px] p-6.5 flex flex-col justify-between animate-slide-in-left">
               <div>
                 <span className="text-xs font-semibold text-[#1D7A53] uppercase tracking-wider block mb-1">
                   Pacing Engine
@@ -227,21 +228,21 @@ export const Landing: React.FC = () => {
                   Unlike traditional monthly budgets that fail on day 10, RUNWAY calculates what you can spend today after locking obligations, upcoming bills, and goal contributions. Overspending today recalculates tomorrow’s allowance immediately.
                 </p>
               </div>
-              <div className="bg-[#FBF8F3] border border-[#E6DFD2] rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-[#FBF8F3] border border-[#E6DFD2] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <span className="text-xs text-[#5E5A52] block">Current Formula</span>
                   <span className="font-mono text-xs font-semibold text-[#16140F]">
                     (Liquid Balance - Remaining Commitments - Buffer) ÷ Days Left
                   </span>
                 </div>
-                <span className="bg-[#D4F23A] text-[#16140F] text-xs font-bold px-2.5 py-1 rounded-md">
+                <span className="bg-[#D4F23A] text-[#16140F] text-xs font-bold px-2.5 py-1 rounded-md self-start sm:self-auto">
                   Dynamic
                 </span>
               </div>
             </div>
 
             {/* Feature 2: Surprise Buffer */}
-            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between">
+            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between animate-slide-in-right">
               <div>
                 <span className="text-xs font-semibold text-[#A15C07] uppercase tracking-wider block mb-1">
                   Contingency Guard
@@ -260,7 +261,7 @@ export const Landing: React.FC = () => {
             </div>
 
             {/* Feature 3: Commitments & Subscriptions */}
-            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between">
+            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between animate-slide-in-left">
               <div>
                 <span className="text-xs font-semibold text-[#5E5A52] uppercase tracking-wider block mb-1">
                   Obligations
@@ -278,7 +279,7 @@ export const Landing: React.FC = () => {
             </div>
 
             {/* Feature 4: Savings Goals */}
-            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between">
+            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between animate-pop-up">
               <div>
                 <span className="text-xs font-semibold text-[#1D7A53] uppercase tracking-wider block mb-1">
                   Wealth Building
@@ -296,7 +297,7 @@ export const Landing: React.FC = () => {
             </div>
 
             {/* Feature 5: Risk Meter & Health Score */}
-            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between">
+            <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-6 flex flex-col justify-between animate-slide-in-right">
               <div>
                 <span className="text-xs font-semibold text-[#C2410C] uppercase tracking-wider block mb-1">
                   Diagnostic Cockpit

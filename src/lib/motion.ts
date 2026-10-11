@@ -8,7 +8,8 @@ export const transitions: Record<string, Transition> = {
   instant: { duration: 0 },
   fast: { duration: 0.15, ease: 'easeOut' },
   default: { duration: 0.22, ease: 'easeOut' },
-  gentle: { duration: 0.25, ease: 'easeOut' },
+  gentle: { duration: 0.28, ease: 'easeOut' },
+  spring: { type: 'spring', damping: 24, stiffness: 320 },
 }
 
 export const fadeInVariants: Variants = {
@@ -25,6 +26,50 @@ export const slideUpVariants: Variants = {
     opacity: 1,
     y: 0,
     transition: transitions.default,
+  },
+}
+
+export const slideInLeftVariants: Variants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: transitions.default,
+  },
+  exit: {
+    opacity: 0,
+    x: -16,
+    transition: transitions.fast,
+  },
+}
+
+export const slideInRightVariants: Variants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: transitions.default,
+  },
+  exit: {
+    opacity: 0,
+    x: 16,
+    transition: transitions.fast,
+  },
+}
+
+export const popUpVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.94, y: 8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: transitions.spring,
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: 6,
+    transition: transitions.fast,
   },
 }
 
@@ -66,3 +111,4 @@ export const listItemVariants: Variants = {
     transition: transitions.fast,
   },
 }
+

@@ -96,7 +96,7 @@ export const GoalsTab: React.FC<GoalsTabProps> = ({
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
           {goals.map((g) => {
             const proj = goalProjections.find((p) => p.goalId === g.id)
             const currentSaved = proj?.saved ?? g.startingSaved

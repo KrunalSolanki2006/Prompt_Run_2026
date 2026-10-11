@@ -18,14 +18,14 @@ export const CockpitStats: React.FC<CockpitStatsProps> = ({
   return (
     <div className="space-y-6">
       {/* ALLOWANCE HERO WITH ANIMATED NUMBER */}
-      <div className="bg-white border border-[#E6DFD2] rounded-[18px] p-6 sm:p-8 shadow-xs relative overflow-hidden">
+      <div className="bg-white border border-[#E6DFD2] rounded-[18px] p-5 sm:p-8 shadow-xs relative overflow-hidden animate-pop-up">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 mb-4">
           <div>
             <span className="text-xs font-bold text-[#5E5A52] uppercase tracking-wider block mb-1">
               Discretionary Pacing
             </span>
             <div className="flex items-baseline gap-3 flex-wrap">
-              <h2 className="font-['Bricolage_Grotesque_Variable'] text-4xl sm:text-5xl font-extrabold text-[#16140F] tabular-nums">
+              <h2 className="font-['Bricolage_Grotesque_Variable'] text-3xl sm:text-5xl font-extrabold text-[#16140F] tabular-nums">
                 {hasCycle ? (
                   <>
                     ₹<AnimatedNumber value={snapshot.allowance.leftToday} />
@@ -79,74 +79,82 @@ export const CockpitStats: React.FC<CockpitStatsProps> = ({
       </div>
 
       {/* 4 STAT TILES: WALLET, FORECAST, RISK, HEALTH */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Wallet */}
-        <StatTile
-          label="Liquid Wallet"
-          value={hasCycle ? <Money amount={snapshot.wallet} size="2xl" /> : '₹10,000'}
-          subtitle={
-            hasCycle
-              ? `₹${snapshot.savedInGoals.toLocaleString('en-IN')} locked in savings goals`
-              : 'Initial challenge allocation'
-          }
-          icon={<Wallet className="w-4 h-4" />}
-        />
+        <div className="animate-pop-up" style={{ animationDelay: '0.04s' }}>
+          <StatTile
+            label="Liquid Wallet"
+            value={hasCycle ? <Money amount={snapshot.wallet} size="2xl" /> : '₹10,000'}
+            subtitle={
+              hasCycle
+                ? `₹${snapshot.savedInGoals.toLocaleString('en-IN')} locked in savings goals`
+                : 'Initial challenge allocation'
+            }
+            icon={<Wallet className="w-4 h-4" />}
+          />
+        </div>
 
         {/* Forecast End */}
-        <StatTile
-          label="Cycle End Forecast"
-          value={hasCycle ? <Money amount={snapshot.forecast.endExpected} size="2xl" /> : '₹—'}
-          subtitle={
-            hasCycle
-              ? `Pessimistic scenario: ₹${snapshot.forecast.endPessimistic.toLocaleString('en-IN')}`
-              : 'Calculated once expenses and commitments are logged'
-          }
-          icon={<TrendingUp className="w-4 h-4" />}
-        />
+        <div className="animate-pop-up" style={{ animationDelay: '0.08s' }}>
+          <StatTile
+            label="Cycle End Forecast"
+            value={hasCycle ? <Money amount={snapshot.forecast.endExpected} size="2xl" /> : '₹—'}
+            subtitle={
+              hasCycle
+                ? `Pessimistic scenario: ₹${snapshot.forecast.endPessimistic.toLocaleString('en-IN')}`
+                : 'Calculated once expenses and commitments are logged'
+            }
+            icon={<TrendingUp className="w-4 h-4" />}
+          />
+        </div>
 
         {/* Risk Gauge */}
-        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between">
-          <Gauge
-            value={hasCycle ? snapshot.risk.score : null}
-            label="Risk Score"
-            level={
-              hasCycle
-                ? snapshot.risk.level === 'low'
-                  ? 'safe'
-                  : snapshot.risk.level === 'moderate'
-                  ? 'watch'
-                  : snapshot.risk.level === 'high'
-                  ? 'risk'
-                  : 'critical'
-                : 'neutral'
-            }
-            unit="/100"
-          />
-          <div className="text-center mt-2">
-            <span className="text-[11px] text-[#5E5A52] block">
-              {hasCycle ? snapshot.risk.drivers[0]?.label ?? 'No major risk factors' : 'Awaiting cycle setup'}
-            </span>
+        <div className="animate-pop-up" style={{ animationDelay: '0.12s' }}>
+          <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between h-full">
+            <Gauge
+              value={hasCycle ? snapshot.risk.score : null}
+              label="Risk Score"
+              level={
+                hasCycle
+                  ? snapshot.risk.level === 'low'
+                    ? 'safe'
+                    : snapshot.risk.level === 'moderate'
+                    ? 'watch'
+                    : snapshot.risk.level === 'high'
+                    ? 'risk'
+                    : 'critical'
+                  : 'neutral'
+              }
+              unit="/100"
+            />
+            <div className="text-center mt-2">
+              <span className="text-[11px] text-[#5E5A52] block">
+                {hasCycle ? snapshot.risk.drivers[0]?.label ?? 'No major risk factors' : 'Awaiting cycle setup'}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Health Gauge */}
-        <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between">
-          <Gauge
-            value={hasCycle && snapshot.health.score !== null ? snapshot.health.score : null}
-            label="Health Grade"
-            level={
-              hasCycle && snapshot.health.grade === 'strong'
-                ? 'safe'
-                : hasCycle && snapshot.health.grade === 'steady'
-                ? 'watch'
-                : 'neutral'
-            }
-            unit=" pts"
-          />
-          <div className="text-center mt-2">
-            <span className="text-[11px] text-[#5E5A52] block">
-              {hasCycle ? `Grade: ${snapshot.health.grade ?? 'Evaluating'}` : 'Requires active tracking'}
-            </span>
+        <div className="animate-pop-up" style={{ animationDelay: '0.16s' }}>
+          <div className="bg-white border border-[#E6DFD2] rounded-[14px] p-4 flex flex-col items-center justify-between h-full">
+            <Gauge
+              value={hasCycle && snapshot.health.score !== null ? snapshot.health.score : null}
+              label="Health Grade"
+              level={
+                hasCycle && snapshot.health.grade === 'strong'
+                  ? 'safe'
+                  : hasCycle && snapshot.health.grade === 'steady'
+                  ? 'watch'
+                  : 'neutral'
+              }
+              unit=" pts"
+            />
+            <div className="text-center mt-2">
+              <span className="text-[11px] text-[#5E5A52] block">
+                {hasCycle ? `Grade: ${snapshot.health.grade ?? 'Evaluating'}` : 'Requires active tracking'}
+              </span>
+            </div>
           </div>
         </div>
       </div>

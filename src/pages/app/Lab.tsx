@@ -8,6 +8,7 @@ import {
   betterTimingHint,
 } from '@/engine/engine'
 import { PageHeader } from '@/components/PageHeader'
+import { ArrowDown } from 'lucide-react'
 import { LabDecisionForm } from './lab/LabDecisionForm'
 import { LabImpactSummary } from './lab/LabImpactSummary'
 import { LabCommitDialog } from './lab/LabCommitDialog'
@@ -186,7 +187,7 @@ export const Lab: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: DECISION PICKER & DYNAMIC FORM */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-6 animate-slide-in-left">
           <LabDecisionForm
             state={state}
             today={today}
@@ -195,8 +196,8 @@ export const Lab: React.FC = () => {
           />
         </div>
 
-        {/* RIGHT COLUMN: SCENARIO BASKET & IMPACT PANEL (Sticky) */}
-        <div className="lg:col-span-5 sticky top-20 space-y-5">
+        {/* RIGHT COLUMN: SCENARIO BASKET & IMPACT PANEL (Sticky on desktop) */}
+        <div id="lab-impact-summary" className="lg:col-span-5 lg:sticky lg:top-20 space-y-5 scroll-mt-20 animate-slide-in-right">
           <LabImpactSummary
             basket={basket}
             hasDecisions={hasDecisions}
@@ -210,6 +211,26 @@ export const Lab: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* MOBILE/TABLET FLOATING SUMMARY JUMP PILL */}
+      {hasDecisions && (
+        <aside
+          aria-label="Staged decisions summary"
+          className="lg:hidden sticky bottom-16 sm:bottom-4 z-20 bg-[#16140F] text-[#FBF8F3] p-3 rounded-xl shadow-lg flex items-center justify-between border border-[#D4F23A]/30 animate-pop-up"
+        >
+          <div className="flex items-center gap-2 text-xs">
+            <span className="w-2 h-2 rounded-full bg-[#D4F23A] animate-pulse" />
+            <span className="font-semibold">{basket.length} decision{basket.length > 1 ? 's' : ''} staged</span>
+          </div>
+          <a
+            href="#lab-impact-summary"
+            className="text-xs font-bold text-[#16140F] bg-[#D4F23A] hover:bg-[#D4F23A]/90 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
+          >
+            <span>View Ripple Impact</span>
+            <ArrowDown className="w-3.5 h-3.5" />
+          </a>
+        </aside>
+      )}
 
       {/* COMMIT CONFIRMATION MODAL */}
       <LabCommitDialog

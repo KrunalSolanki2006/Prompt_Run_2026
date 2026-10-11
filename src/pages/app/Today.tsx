@@ -248,7 +248,7 @@ export const Today: React.FC = () => {
       {/* PRIORITY ALERT BANNER */}
       {alertBanner && (
         <div
-          className={`rounded-[14px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border ${
+          className={`rounded-[14px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border animate-pop-up ${
             alertBanner.type === 'critical'
               ? 'bg-[#B42318]/10 border-[#B42318]/30 text-[#B42318]'
               : alertBanner.type === 'warning'
@@ -278,7 +278,7 @@ export const Today: React.FC = () => {
 
       {/* CYCLE COMPLETED CELEBRATORY CARD */}
       {hasCycle && snapshot.cyclePhase === 'completed' && (
-        <div className="bg-white border-2 border-[#16140F] rounded-[18px] p-6 shadow-sm space-y-4">
+        <div className="bg-white border-2 border-[#16140F] rounded-[18px] p-6 shadow-sm space-y-4 animate-pop-up">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E6DFD2]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#16140F] text-[#D4F23A] flex items-center justify-center font-bold">
@@ -361,25 +361,34 @@ export const Today: React.FC = () => {
       <RunwayChart
         points={hasCycle ? snapshot.forecast.points : []}
         title="30-Day Runway Trajectory"
+        className="animate-pop-up"
       />
 
       {/* TWO COLUMNS: COMING UP & SAVINGS GOALS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <UpcomingBillsCard
-          occurrences={upcomingOccurrences}
-          onSettle={settleOccurrence}
-        />
-        <SavingsGoalsMiniCard
-          goals={state.goals}
-          goalProjections={snapshot.goals}
-        />
+        <div className="animate-slide-in-left">
+          <UpcomingBillsCard
+            occurrences={upcomingOccurrences}
+            onSettle={settleOccurrence}
+          />
+        </div>
+        <div className="animate-slide-in-right">
+          <SavingsGoalsMiniCard
+            goals={state.goals}
+            goalProjections={snapshot.goals}
+          />
+        </div>
       </div>
 
       {/* RECENT ACTIVITY (LAST 5 TRANSACTIONS) */}
-      <RecentActivityCard transactions={recentTransactions} />
+      <div className="animate-pop-up">
+        <RecentActivityCard transactions={recentTransactions} />
+      </div>
 
       {/* ONBOARDING CHECKLIST */}
-      <CycleChecklistCard items={checklistItems} />
+      <div className="animate-pop-up">
+        <CycleChecklistCard items={checklistItems} />
+      </div>
 
       {/* CYCLE COMPLETION MODAL */}
       <CycleCompletionModal

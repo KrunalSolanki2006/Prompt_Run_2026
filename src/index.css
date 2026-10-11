@@ -60,7 +60,15 @@ html {
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 
 body {
   margin: 0;
@@ -105,3 +113,96 @@ input, select, textarea, button {
 ::-webkit-scrollbar-thumb:hover {
   background: #5E5A52;
 }
+
+/* Custom directional and pop-up animation utilities */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes popUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  70% {
+    transform: scale(1.01) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes popDown {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pop-up {
+  animation: popUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pop-down {
+  animation: popDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dialogPopUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.95);
+  }
+  70% {
+    transform: translate(-50%, -50.5%) scale(1.008);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.animate-dialog-pop-up {
+  animation: dialogPopUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-pop-up,
+  .animate-pop-down,
+  .animate-dialog-pop-up {
+    animation: none !important;
+  }
+}
+

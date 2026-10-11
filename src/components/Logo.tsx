@@ -5,16 +5,18 @@ interface LogoProps {
   className?: string
   to?: string
   showTagline?: boolean
+  hideTextOnTablet?: boolean
 }
 
 export const Logo: React.FC<LogoProps> = ({
   className = '',
   to = '/',
   showTagline = false,
+  hideTextOnTablet = false,
 }) => {
   const content = (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className="w-8 h-8 rounded-lg bg-[#16140F] flex items-center justify-center p-1.5 shadow-xs border border-[#16140F]">
+      <div className="w-8 h-8 rounded-lg bg-[#16140F] flex items-center justify-center p-1.5 shadow-xs border border-[#16140F] shrink-0">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -38,7 +40,7 @@ export const Logo: React.FC<LogoProps> = ({
           />
         </svg>
       </div>
-      <div>
+      <div className={hideTextOnTablet ? 'hidden lg:block' : ''}>
         <span className="font-['Bricolage_Grotesque_Variable'] text-xl font-bold tracking-tight text-[#16140F] block leading-none">
           RUNWAY
         </span>
@@ -65,3 +67,4 @@ export const Logo: React.FC<LogoProps> = ({
 
   return content
 }
+

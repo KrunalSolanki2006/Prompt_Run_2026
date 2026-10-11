@@ -63,7 +63,7 @@ export const Setup: React.FC = () => {
         }
       />
 
-      <div className="bg-white border border-[#E6DFD2] rounded-[18px] p-6 sm:p-8 shadow-xs">
+      <div className="bg-white border border-[#E6DFD2] rounded-[18px] p-6 sm:p-8 shadow-xs animate-pop-up">
         <div className="mb-6 pb-4 border-b border-[#E6DFD2]/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#5E5A52] uppercase tracking-wider mb-1">
             <Sparkles className="w-4 h-4 text-[#A15C07]" />
@@ -169,7 +169,7 @@ export const Setup: React.FC = () => {
           </div>
 
           {/* Summary Box */}
-          <div className="rounded-[12px] bg-[#FBF8F3] border border-[#E6DFD2] p-4 text-xs space-y-2">
+          <div className="rounded-[12px] bg-[#FBF8F3] border border-[#E6DFD2] p-4 text-xs space-y-2 animate-slide-in-left">
             <div className="flex justify-between items-center text-[#5E5A52]">
               <span>Discretionary Pool Baseline:</span>
               <span className="font-semibold text-[#16140F] tabular-nums">

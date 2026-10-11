@@ -36,20 +36,20 @@ export const RecentActivityCard: React.FC<RecentActivityCardProps> = ({
         <div className="divide-y divide-[#E6DFD2]">
           {transactions.map((t) => (
             <div key={t.id} className="py-2.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <CategoryIcon category={t.category} size="sm" />
-                <div>
-                  <span className="text-xs font-bold text-[#16140F] block">
+                <div className="min-w-0">
+                  <span className="text-xs font-bold text-[#16140F] block truncate">
                     {t.note || t.category}
                   </span>
-                  <span className="text-[11px] text-[#5E5A52]">
+                  <span className="text-[11px] text-[#5E5A52] block truncate">
                     {t.date} · {t.tag.toUpperCase()}
                     {t.unexpected ? ' · Unexpected' : ''}
                   </span>
                 </div>
               </div>
 
-              <div className="font-['Bricolage_Grotesque_Variable'] font-bold text-sm tabular-nums">
+              <div className="font-['Bricolage_Grotesque_Variable'] font-bold text-sm tabular-nums shrink-0">
                 <span
                   className={
                     t.kind === 'income'

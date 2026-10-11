@@ -31,16 +31,17 @@ import { Button } from '@/components/ui/button'
 
 interface NavItem {
   label: string
+  shortLabel: string
   to: string
   icon: React.ReactNode
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Today', to: '/app', icon: <CalendarDays className="w-4 h-4" /> },
-  { label: 'Decision Lab', to: '/app/lab', icon: <FlaskConical className="w-4 h-4" /> },
-  { label: 'Plan', to: '/app/plan', icon: <Layers className="w-4 h-4" /> },
-  { label: 'Activity', to: '/app/activity', icon: <ReceiptText className="w-4 h-4" /> },
-  { label: 'Insights', to: '/app/insights', icon: <LineChart className="w-4 h-4" /> },
+  { label: 'Today', shortLabel: 'Today', to: '/app', icon: <CalendarDays className="w-4 h-4" /> },
+  { label: 'Decision Lab', shortLabel: 'Lab', to: '/app/lab', icon: <FlaskConical className="w-4 h-4" /> },
+  { label: 'Plan', shortLabel: 'Plan', to: '/app/plan', icon: <Layers className="w-4 h-4" /> },
+  { label: 'Activity', shortLabel: 'Activity', to: '/app/activity', icon: <ReceiptText className="w-4 h-4" /> },
+  { label: 'Insights', shortLabel: 'Insights', to: '/app/insights', icon: <LineChart className="w-4 h-4" /> },
 ]
 
 export const AppShell: React.FC = () => {
@@ -110,7 +111,7 @@ export const AppShell: React.FC = () => {
     : 'U'
 
   return (
-    <div className="min-h-screen bg-[#FBF8F3] text-[#16140F] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#FBF8F3] text-[#16140F] flex flex-col md:flex-row">
       {/* Skip to Content */}
       <a
         href="#app-content"
@@ -119,48 +120,49 @@ export const AppShell: React.FC = () => {
         Skip to main content
       </a>
 
-      {/* DESKTOP SIDEBAR */}
-      <aside className="hidden lg:flex w-60 shrink-0 bg-white border-r border-[#E6DFD2] flex-col justify-between p-5 sticky top-0 h-screen">
+      {/* TABLET RAIL & DESKTOP SIDEBAR */}
+      <aside className="hidden md:flex md:w-20 lg:w-60 shrink-0 bg-white border-r border-[#E6DFD2] flex-col justify-between p-3 lg:p-5 sticky top-0 h-screen transition-all duration-200">
         <div>
-          <div className="mb-7 pl-1">
-            <Logo showTagline />
+          <div className="mb-7 flex justify-center lg:justify-start lg:pl-1">
+            <Logo showTagline hideTextOnTablet />
           </div>
 
-          <nav aria-label="App Navigation" className="space-y-1">
+          <nav aria-label="App Navigation" className="space-y-1.5 lg:space-y-1">
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.to === '/app'}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-[10px] text-sm font-semibold transition-colors ${
+                  `flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-3 px-2 lg:px-3.5 py-2.5 rounded-[10px] font-semibold transition-colors ${
                     isActive
                       ? 'bg-[#16140F] text-[#FBF8F3]'
                       : 'text-[#5E5A52] hover:text-[#16140F] hover:bg-[#FBF8F3]'
                   }`
                 }
               >
-                {item.icon}
-                <span>{item.label}</span>
+                <span className="shrink-0">{item.icon}</span>
+                <span className="lg:hidden text-[10px] leading-tight truncate">{item.shortLabel}</span>
+                <span className="hidden lg:inline text-sm truncate">{item.label}</span>
               </NavLink>
             ))}
           </nav>
         </div>
 
         {/* Sidebar Footer / User Profile */}
-        <div className="pt-4 border-t border-[#E6DFD2]">
+        <div className="pt-3 lg:pt-4 border-t border-[#E6DFD2]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#FBF8F3] transition-colors text-left focus-visible:outline-2 focus-visible:outline-[#16140F]"
+                className="w-full flex items-center justify-center lg:justify-between p-1.5 lg:p-2 rounded-lg hover:bg-[#FBF8F3] transition-colors text-left focus-visible:outline-2 focus-visible:outline-[#16140F]"
                 aria-label="User account menu"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-[#16140F] text-[#FBF8F3] flex items-center justify-center font-bold text-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-[#16140F] text-[#FBF8F3] flex items-center justify-center font-bold text-xs shrink-0">
                     {userInitials}
                   </div>
-                  <div className="leading-tight truncate max-w-[120px]">
+                  <div className="hidden lg:block leading-tight truncate max-w-[120px]">
                     <span className="font-semibold text-xs text-[#16140F] block truncate">
                       {user?.name || 'Local User'}
                     </span>
@@ -169,7 +171,7 @@ export const AppShell: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <Settings className="w-4 h-4 text-[#5E5A52]" />
+                <Settings className="hidden lg:block w-4 h-4 text-[#5E5A52] shrink-0" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white border-[#E6DFD2]">
@@ -199,23 +201,23 @@ export const AppShell: React.FC = () => {
       </aside>
 
       {/* MAIN COCKPIT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-8">
+      <div className="flex-1 flex flex-col min-w-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-8">
         {/* TOP COCKPIT HEADER */}
-        <header className="sticky top-0 z-30 bg-[#FBF8F3]/90 backdrop-blur-md border-b border-[#E6DFD2] px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="lg:hidden">
+        <header className="sticky top-0 z-30 bg-[#FBF8F3]/90 backdrop-blur-md border-b border-[#E6DFD2] px-3.5 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="md:hidden shrink-0">
               <Logo />
             </div>
             {cycleDayChip}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Global Quick Add Button */}
             {state.cycle && (
               <Button
                 type="button"
                 onClick={() => setQuickAddOpen(true)}
-                className="h-9 min-h-[44px] px-3.5 bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs"
+                className="h-9 min-h-[44px] px-3 sm:px-3.5 bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs"
               >
                 <Plus className="w-4 h-4 text-[#D4F23A]" />
                 <span className="hidden sm:inline">Add Transaction</span>
@@ -223,7 +225,7 @@ export const AppShell: React.FC = () => {
             )}
 
             {/* Mobile User Menu */}
-            <div className="lg:hidden">
+            <div className="md:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -264,7 +266,7 @@ export const AppShell: React.FC = () => {
         </header>
 
         {/* OUTLET PAGE CONTAINER */}
-        <main id="app-content" className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full">
+        <main id="app-content" className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
           {isStorageBlocked && (
             <div
               role="alert"
@@ -298,7 +300,7 @@ export const AppShell: React.FC = () => {
       {/* MOBILE BOTTOM NAVIGATION BAR */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E6DFD2] px-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex justify-around items-center"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E6DFD2] px-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex justify-around items-center"
       >
         {NAV_ITEMS.map((item) => (
           <NavLink

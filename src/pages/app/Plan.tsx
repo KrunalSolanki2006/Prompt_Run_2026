@@ -116,7 +116,7 @@ export const Plan: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="income">
+        <TabsContent value="income" className="animate-slide-in-left">
           <IncomesTab
             incomes={state.incomes}
             today={today}
@@ -128,7 +128,7 @@ export const Plan: React.FC = () => {
           />
         </TabsContent>
 
-        <TabsContent value="commitments">
+        <TabsContent value="commitments" className="animate-slide-in-left">
           <CommitmentsTab
             commitments={state.commitments}
             today={today}
@@ -140,7 +140,7 @@ export const Plan: React.FC = () => {
           />
         </TabsContent>
 
-        <TabsContent value="subscriptions">
+        <TabsContent value="subscriptions" className="animate-slide-in-left">
           <SubscriptionsTab
             subscriptions={state.subscriptions}
             today={today}
@@ -153,7 +153,7 @@ export const Plan: React.FC = () => {
           />
         </TabsContent>
 
-        <TabsContent value="goals">
+        <TabsContent value="goals" className="animate-slide-in-left">
           <GoalsTab
             goals={state.goals}
             goalProjections={snapshot.goals}

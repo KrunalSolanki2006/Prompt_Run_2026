@@ -76,7 +76,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
           {subscriptions.map((sub) => (
             <div
               key={sub.id}
