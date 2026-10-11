@@ -33,6 +33,16 @@ export type FinanceAction =
   | { type: 'UPDATE_TRANSACTION'; payload: Transaction }
   | { type: 'DELETE_TRANSACTION'; payload: { id: string } }
   | { type: 'LOG_DECISION'; payload: DecisionLogEntry }
+  | {
+      type: 'COMMIT_DECISIONS'
+      payload: {
+        transactions: Transaction[]
+        commitments: Commitment[]
+        subscriptions: Subscription[]
+        toggledSubscriptionIds: string[]
+        decisions: DecisionLogEntry[]
+      }
+    }
   | { type: 'RESET_DATA' }
 
 export const initialFinanceState: FinanceState = {
@@ -238,6 +248,30 @@ export function financeReducer(
         ...state,
         decisions: [action.payload, ...state.decisions],
       }
+
+    case 'COMMIT_DECISIONS': {
+      const {
+        transactions,
+        commitments,
+        subscriptions,
+        toggledSubscriptionIds,
+        decisions,
+      } = action.payload
+
+      const updatedSubs = state.subscriptions.map((s) =>
+        toggledSubscriptionIds.includes(s.id)
+          ? { ...s, status: (s.status === 'active' ? 'paused' : 'active') as 'active' | 'paused' }
+          : s
+      )
+
+      return {
+        ...state,
+        transactions: [...transactions, ...state.transactions],
+        commitments: [...state.commitments, ...commitments],
+        subscriptions: [...updatedSubs, ...subscriptions],
+        decisions: [...decisions, ...state.decisions],
+      }
+    }
 
     case 'RESET_DATA':
       return initialFinanceState

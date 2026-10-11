@@ -27,6 +27,9 @@ import type {
   Decision,
   DecisionLogEntry,
   CategoryId,
+  Transaction,
+  Commitment,
+  Subscription,
 } from '@/engine/types'
 import { cleanText } from '@/lib/sanitize'
 import { formatRupees } from '@/lib/format'
@@ -134,11 +137,7 @@ export const Lab: React.FC = () => {
   const {
     state,
     snapshot,
-    addTransaction,
-    addCommitment,
-    addSubscription,
-    toggleSubscription,
-    logDecision,
+    commitDecisionsBatch,
   } = useFinance()
   const today = useToday()
 
@@ -313,10 +312,16 @@ export const Lab: React.FC = () => {
   const handleExecuteCommit = (_e?: React.MouseEvent) => {
     if (committableDecisions.length === 0) return
 
+    const newTxns: Transaction[] = []
+    const newComs: Commitment[] = []
+    const newSubs: Subscription[] = []
+    const toggledSubIds: string[] = []
+    const newDecisionLogs: DecisionLogEntry[] = []
+
     for (const d of committableDecisions) {
       if (d.type === 'purchase') {
         if (d.date <= today) {
-          addTransaction({
+          newTxns.push({
             id: makeLabId('txn'),
             date: d.date,
             amount: d.amount,
@@ -327,7 +332,7 @@ export const Lab: React.FC = () => {
             unexpected: false,
           })
         } else {
-          addCommitment({
+          newComs.push({
             id: makeLabId('com'),
             label: d.label,
             amount: d.amount,
@@ -336,7 +341,7 @@ export const Lab: React.FC = () => {
           })
         }
       } else if (d.type === 'new_subscription') {
-        addSubscription({
+        newSubs.push({
           id: makeLabId('sub'),
           name: d.name,
           amount: d.amount,
@@ -345,9 +350,9 @@ export const Lab: React.FC = () => {
           status: 'active',
         })
       } else if (d.type === 'cancel_subscription') {
-        toggleSubscription(d.subscriptionId)
+        toggledSubIds.push(d.subscriptionId)
       } else if (d.type === 'new_commitment') {
-        addCommitment({
+        newComs.push({
           id: makeLabId('com'),
           label: d.label,
           amount: d.amount,
@@ -355,7 +360,7 @@ export const Lab: React.FC = () => {
           recurrence: d.recurrence,
         })
       } else if (d.type === 'goal_deposit') {
-        addTransaction({
+        newTxns.push({
           id: makeLabId('txn'),
           date: today,
           amount: d.amount,
@@ -368,8 +373,7 @@ export const Lab: React.FC = () => {
         })
       }
 
-      // Log entry
-      const logEntry: DecisionLogEntry = {
+      newDecisionLogs.push({
         id: makeLabId('log'),
         timestamp: new Date().toISOString(),
         decision: d,
@@ -378,9 +382,20 @@ export const Lab: React.FC = () => {
           allowanceDelta: evaluation.deltas.allowanceDelta,
           riskDelta: evaluation.deltas.riskDelta,
         },
-      }
-      logDecision(logEntry)
+      })
     }
+
+    const label = `Committed ${committableDecisions.length} decision${committableDecisions.length > 1 ? 's' : ''} from Lab`
+    commitDecisionsBatch(
+      {
+        transactions: newTxns,
+        commitments: newComs,
+        subscriptions: newSubs,
+        toggledSubscriptionIds: toggledSubIds,
+        decisions: newDecisionLogs,
+      },
+      label
+    )
 
     setCommitDialogOpen(false)
     setBasket([])

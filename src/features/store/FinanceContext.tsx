@@ -58,6 +58,16 @@ interface FinanceContextValue {
   updateGoal: (goal: Goal) => void
   deleteGoal: (id: string) => void
   logDecision: (entry: DecisionLogEntry) => void
+  commitDecisionsBatch: (
+    batch: {
+      transactions: Transaction[]
+      commitments: Commitment[]
+      subscriptions: Subscription[]
+      toggledSubscriptionIds: string[]
+      decisions: DecisionLogEntry[]
+    },
+    label: string
+  ) => void
   settleOccurrence: (occ: Occurrence, paidDate?: string) => void
   resetData: () => void
   exportJSON: () => string
@@ -204,23 +214,24 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({
         changes.push(`Health score: ${sign}${hDiff} pts`)
       }
 
-      // Show consequence toast if any metric moved
-      if (changes.length > 0) {
-        const title = actionLabel ?? 'Updated finances'
-        const metricsSummary = changes.slice(0, 3).join(' · ')
+      // Show consequence toast with deltas and undo
+      const title = actionLabel ?? 'Updated finances'
+      const metricsSummary =
+        changes.length > 0
+          ? changes.slice(0, 3).join(' · ')
+          : 'Trajectory and commitments updated in sync.'
 
-        toast(title, {
-          description: metricsSummary,
-          action: {
-            label: 'Undo',
-            onClick: () => {
-              dispatchRaw({ type: 'SET_STATE', payload: preState })
-              toast.info('Action undone', { description: 'Restored previous state.' })
-            },
+      toast(title, {
+        description: metricsSummary,
+        action: {
+          label: 'Undo',
+          onClick: () => {
+            dispatchRaw({ type: 'SET_STATE', payload: preState })
+            toast.info('Action undone', { description: 'Restored previous state.' })
           },
-          duration: 5000,
-        })
-      }
+        },
+        duration: 5000,
+      })
     },
     [state, today]
   )
@@ -255,14 +266,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addTransaction = useCallback(
     (txn: Transaction) => {
-      const label =
-        txn.kind === 'income'
-          ? `Logged income: ${formatRupees(txn.amount)}`
-          : txn.kind === 'goal_deposit'
-          ? `Goal deposit: ${formatRupees(txn.amount)}`
-          : txn.unexpected
-          ? `Unexpected spend: ${formatRupees(txn.amount)}`
-          : `Logged spend: ${formatRupees(txn.amount)}`
+      const label = txn.link
+        ? txn.note
+        : txn.kind === 'income'
+        ? `Logged income: ${formatRupees(txn.amount)}`
+        : txn.kind === 'goal_deposit'
+        ? `Goal deposit: ${formatRupees(txn.amount)}`
+        : txn.unexpected
+        ? `Unexpected spend: ${formatRupees(txn.amount)}`
+        : `Logged spend: ${formatRupees(txn.amount)}`
       dispatchWithConsequence({ type: 'ADD_TRANSACTION', payload: txn }, label)
     },
     [dispatchWithConsequence]
@@ -428,6 +440,25 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({
     [dispatchWithConsequence]
   )
 
+  const commitDecisionsBatch = useCallback(
+    (
+      batch: {
+        transactions: Transaction[]
+        commitments: Commitment[]
+        subscriptions: Subscription[]
+        toggledSubscriptionIds: string[]
+        decisions: DecisionLogEntry[]
+      },
+      label: string
+    ) => {
+      dispatchWithConsequence(
+        { type: 'COMMIT_DECISIONS', payload: batch },
+        label
+      )
+    },
+    [dispatchWithConsequence]
+  )
+
   const settleOccurrence = useCallback(
     (occ: Occurrence, paidDate?: string) => {
       const txnDate = paidDate ?? today
@@ -512,6 +543,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({
         updateGoal,
         deleteGoal,
         logDecision,
+        commitDecisionsBatch,
         settleOccurrence,
         resetData,
         exportJSON,
