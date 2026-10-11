@@ -88,6 +88,7 @@ export const Setup: React.FC = () => {
               <Input
                 id="setup-budget"
                 type="number"
+                inputMode="numeric"
                 min="1"
                 max="1000000"
                 step="1"
@@ -147,6 +148,7 @@ export const Setup: React.FC = () => {
             <Input
               id="setup-buffer"
               type="number"
+              inputMode="numeric"
               min="0"
               max="30"
               step="1"

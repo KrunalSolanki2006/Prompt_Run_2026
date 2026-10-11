@@ -16,6 +16,8 @@ import {
   LogOut,
   Sparkles,
   CheckCircle,
+  AlertTriangle,
+  AlertOctagon,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -46,7 +48,17 @@ export const AppShell: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, signOut } = useAuth()
-  const { state, snapshot } = useFinance()
+  const { state, snapshot, corruptBackupKey } = useFinance()
+  const [isStorageBlocked] = useState(() => {
+    try {
+      const testKey = '__runway_storage_test__'
+      localStorage.setItem(testKey, '1')
+      localStorage.removeItem(testKey)
+      return false
+    } catch {
+      return true
+    }
+  })
 
   const [quickAddOpen, setQuickAddOpen] = useState(false)
 
@@ -187,7 +199,7 @@ export const AppShell: React.FC = () => {
       </aside>
 
       {/* MAIN COCKPIT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-8">
+      <div className="flex-1 flex flex-col min-w-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-8">
         {/* TOP COCKPIT HEADER */}
         <header className="sticky top-0 z-30 bg-[#FBF8F3]/90 backdrop-blur-md border-b border-[#E6DFD2] px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -203,7 +215,7 @@ export const AppShell: React.FC = () => {
               <Button
                 type="button"
                 onClick={() => setQuickAddOpen(true)}
-                className="h-9 px-3.5 bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs"
+                className="h-9 min-h-[44px] px-3.5 bg-[#16140F] text-[#FBF8F3] hover:bg-[#16140F]/90 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs"
               >
                 <Plus className="w-4 h-4 text-[#D4F23A]" />
                 <span className="hidden sm:inline">Add Transaction</span>
@@ -216,7 +228,7 @@ export const AppShell: React.FC = () => {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="w-9 h-9 rounded-full bg-white border border-[#E6DFD2] flex items-center justify-center text-[#16140F] font-bold text-xs"
+                    className="w-10 h-10 min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#E6DFD2] flex items-center justify-center text-[#16140F] font-bold text-xs"
                     aria-label="User menu"
                   >
                     {userInitials}
@@ -253,6 +265,32 @@ export const AppShell: React.FC = () => {
 
         {/* OUTLET PAGE CONTAINER */}
         <main id="app-content" className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full">
+          {isStorageBlocked && (
+            <div
+              role="alert"
+              className="mb-5 p-4 rounded-xl bg-[#B42318]/10 border border-[#B42318]/30 text-xs text-[#B42318] flex items-center gap-2.5 shadow-xs"
+            >
+              <AlertOctagon className="w-4 h-4 shrink-0 text-[#B42318]" />
+              <span>
+                <strong>Storage Restricted:</strong> Browser local storage is blocked or full. Financial data will not be persisted across browser refreshes. Please enable cookies and local storage.
+              </span>
+            </div>
+          )}
+
+          {corruptBackupKey && (
+            <div
+              role="alert"
+              className="mb-5 p-4 rounded-xl bg-[#A15C07]/10 border border-[#A15C07]/30 text-xs text-[#A15C07] flex items-center justify-between gap-3 shadow-xs"
+            >
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#A15C07]" />
+                <span>
+                  <strong>Corrupt State Recovered:</strong> Corrupted cycle data was detected and backed up to <code className="font-mono bg-white px-1.5 py-0.5 rounded border border-[#E6DFD2]">{corruptBackupKey}</code>. A clean starting baseline has been initialized.
+                </span>
+              </div>
+            </div>
+          )}
+
           <Outlet />
         </main>
       </div>
@@ -260,7 +298,7 @@ export const AppShell: React.FC = () => {
       {/* MOBILE BOTTOM NAVIGATION BAR */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E6DFD2] px-2 py-1.5 flex justify-around items-center"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E6DFD2] px-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex justify-around items-center"
       >
         {NAV_ITEMS.map((item) => (
           <NavLink
@@ -268,7 +306,7 @@ export const AppShell: React.FC = () => {
             to={item.to}
             end={item.to === '/app'}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-[10px] font-semibold transition-colors ${
+              `flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-2.5 rounded-lg text-[10px] font-semibold transition-colors ${
                 isActive ? 'text-[#16140F]' : 'text-[#5E5A52]'
               }`
             }

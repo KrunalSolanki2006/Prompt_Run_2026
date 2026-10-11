@@ -175,6 +175,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               <Input
                 id="qa-amount"
                 type="number"
+                inputMode="numeric"
                 min="1"
                 step="1"
                 max="1000000"
