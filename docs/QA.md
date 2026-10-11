@@ -2,6 +2,9 @@
 
 ## 1. Executive Summary & STAGE 4 Recovery
 
+- **Live Production App:** [https://prompt-run-2026.vercel.app/](https://prompt-run-2026.vercel.app/)
+- **GitHub Repository:** [https://github.com/KrunalSolanki2006/Prompt_Run_2026](https://github.com/KrunalSolanki2006/Prompt_Run_2026)
+
 This document details the quality assurance, automated test coverage, and recovery audit for **RUNWAY** (Prompt Run 2026).
 
 ### STAGE 4 Root Cause Diagnosis

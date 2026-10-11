@@ -11,7 +11,7 @@
 
 *Built for PROMPT RUN 2026 (Prompt. Build. Run.)*
 
-[GitHub Repository](https://github.com/KrunalSolanki2006/Prompt_Run_2026) · [Prompt Run 2026 Hackathon](https://github.com/KrunalSolanki2006/Prompt_Run_2026)
+[🚀 Live App: prompt-run-2026.vercel.app](https://prompt-run-2026.vercel.app/) · [💻 GitHub: Prompt_Run_2026](https://github.com/KrunalSolanki2006/Prompt_Run_2026)
 
 </div>
 
